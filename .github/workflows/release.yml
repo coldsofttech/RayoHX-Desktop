@@ -33,7 +33,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
       - name: Check tag matches package version
         env:
           TAG: ${{ github.event.release.tag_name }}
@@ -69,7 +69,7 @@ jobs:
       - name: Read project names
         shell: bash
         run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: "3.13"
       - uses: actions/setup-node@v7
@@ -102,7 +102,7 @@ jobs:
     timeout-minutes: 15 # target: under 5 minutes
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: "3.13"
       - name: Read tool versions
@@ -140,7 +140,7 @@ jobs:
       TAG: ${{ github.event.release.tag_name }}
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
       - run: uv sync --locked
       - uses: actions/download-artifact@v8
         with:
@@ -171,7 +171,7 @@ jobs:
       VERSION: ${{ github.event.release.tag_name }}
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
       - run: uv sync --locked
       - uses: actions/download-artifact@v8
         with:
@@ -214,7 +214,7 @@ jobs:
       VERSION: ${{ github.event.release.tag_name }}
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
       - run: uv sync --locked
       - uses: actions/download-artifact@v8
         with:

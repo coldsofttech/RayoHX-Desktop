@@ -29,7 +29,7 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
       # Actions are pinned to version tags on purpose (Dependabot keeps them current), so the
       # rule that asks for commit SHAs is excluded. The rule about environment values reaching
       # subprocess is excluded too: the only hit is SIGN_COMMAND, trusted build configuration that

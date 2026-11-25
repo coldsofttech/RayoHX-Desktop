@@ -31,7 +31,7 @@ jobs:
       - name: Read project names
         shell: bash
         run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: "3.13"
       - uses: actions/setup-node@v7
@@ -101,7 +101,7 @@ jobs:
       - name: Read project names
         shell: bash
         run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: "3.13"
       - name: Read tool versions

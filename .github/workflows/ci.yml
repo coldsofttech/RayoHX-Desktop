@@ -21,7 +21,7 @@ jobs:
       - name: Read project names
         shell: bash
         run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
       - uses: actions/setup-node@v7
         with:
           node-version-file: ${{ env.UI_DIR }}/.nvmrc
@@ -92,7 +92,7 @@ jobs:
             python-version: "3.11"
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: ${{ matrix.python-version }}
       - run: uv sync --locked
@@ -114,7 +114,7 @@ jobs:
             python-version: "3.11"
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: ${{ matrix.python-version }}
       - run: uv sync --locked
@@ -139,7 +139,7 @@ jobs:
       - name: Read project names
         shell: bash
         run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: "3.11"
       - uses: actions/download-artifact@v8
@@ -157,7 +157,7 @@ jobs:
       - name: Read project names
         shell: bash
         run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
       - run: uv build
       - run: uvx twine check --strict dist/*
       - name: Check the package holds the core library and command line only
