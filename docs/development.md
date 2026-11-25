@@ -3,11 +3,11 @@
 ## Layout
 
 ```text
-src/example_package/   library: all the logic, never prints or exits (typed)
-src/example_cli/       Typer + Rich command line: parses input, calls the library, shows output
-src/example_api/       FastAPI app: routers, schemas, errors, settings (see api.md)
-src/example_ui/        Cornea Shell wiring and the `example-ui` command (see ui.md)
-src/example_ui/ui/     React + Vite frontend (JavaScript)
+src/rayohx_package/   library: all the logic, never prints or exits (typed)
+src/rayohx_cli/       Typer + Rich command line: parses input, calls the library, shows output
+src/rayohx_api/       FastAPI app: routers, schemas, errors, settings (see api.md)
+src/rayohx_ui/        Cornea Shell wiring and the `rayohx-ui` command (see ui.md)
+src/rayohx_ui/ui/     React + Vite frontend (JavaScript)
 tests/                 pytest tests, one folder per component: core/, cli/, api/, ui/ (each with integration/)
 installer/             PyInstaller specs, NSIS scripts, nfpm config, pinned tool versions (see packaging.md)
 scripts/               repository settings, OpenAPI export, installer build, release manifests
@@ -16,10 +16,10 @@ pyproject.toml         metadata, dependencies and tool configuration
 uv.lock                locked dependencies (commit this file)
 ```
 
-The example names are `example_package` (library), `example_cli` (command line package), `example_api`, `example_ui`, and the commands `example-cli` and `example-ui`. After creating a repo from this template, run the **Init** workflow with a short lowercase `name` (for example `acme`) and a display `title` (for example "Acme Studio"). It opens a pull request that:
+The example names are `rayohx_package` (library), `rayohx_cli` (command line package), `rayohx_api`, `rayohx_ui`, and the commands `rayohx-cli` and `rayohx-ui`. After creating a repo from this template, run the **Init** workflow with a short lowercase `name` (for example `acme`) and a display `title` (for example "Acme Studio"). It opens a pull request that:
 
 - replaces the owner and repository name;
-- renames the packages (`acme_package`, `acme_cli`, `acme_api`, `acme_ui`), the commands (`acme-cli`, `acme-ui`), the settings prefix (`ACME_API_`) and the app id, and replaces "Example App" with your title;
+- renames the packages (`acme_package`, `acme_cli`, `acme_api`, `acme_ui`), the commands (`acme-cli`, `acme-ui`), the settings prefix (`ACME_API_`) and the app id, and replaces "RayoHX" with your title;
 - generates new product GUIDs for the Windows installers, then regenerates `uv.lock`, `docs/cli-reference.md` and `docs/openapi.json`.
 
 The rename is `scripts/init_template.py` (it replaces only those exact patterns, so prose such as "for example" is left alone, and it deletes itself afterwards, along with `TEMPLATE_CHANGELOG.md`, which records the template's own changes and is not meant for your repository). The workflows and the installer scripts read names from `pyproject.toml` (`[project.scripts]` and `[tool.installer]`, through `installer/projectinfo.py`), so they need no renaming. If you add a new place that uses an example name, keep it in one of the patterns the script knows.
@@ -57,11 +57,11 @@ uv run mypy                # type check
 uv build                   # build the sdist and wheel (core library and command line only)
 ```
 
-Frontend, from `src/example_ui/ui` (or with `--prefix`):
+Frontend, from `src/rayohx_ui/ui` (or with `--prefix`):
 
 ```bash
 npm ci                     # install exactly what package-lock.json says
-npm run dev                # Vite dev server; `uv run python -m example_ui --dev` wraps it in the window
+npm run dev                # Vite dev server; `uv run python -m rayohx_ui --dev` wraps it in the window
 npm run build              # writes dist/, which the window serves and the Windows installer freezes in
 npm run lint && npm test   # ESLint, Vitest
 npm run format             # Prettier
@@ -70,9 +70,9 @@ npm run format             # Prettier
 Other useful commands:
 
 ```bash
-uv run python -m example_api              # run the API on its own (see api.md)
+uv run python -m rayohx_api              # run the API on its own (see api.md)
 uv run python scripts/export_openapi.py   # regenerate docs/openapi.json
-uv run python -m example_ui --no-window   # serve the UI for a browser
+uv run python -m rayohx_ui --no-window   # serve the UI for a browser
 ```
 
 ## Integration tests

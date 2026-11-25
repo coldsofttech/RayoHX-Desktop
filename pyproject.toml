@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "python-cornea-ui-public-repo-template"
+name = "RayoHX-UI"
 dynamic = ["version"]
 description = "Python tool with a command line, an HTTP API and a native Windows UI."
 keywords = ["cli", "api", "ui"]
@@ -32,21 +32,21 @@ dependencies = [
 ]
 
 [project.scripts]
-example-cli = "example_cli.cli:run"
+rayohx-cli = "rayohx_cli.cli:run"
 
 [project.urls]
-Homepage = "https://github.com/coldsofttech/python-cornea-ui-public-repo-template"
-Issues = "https://github.com/coldsofttech/python-cornea-ui-public-repo-template/issues"
-Changelog = "https://github.com/coldsofttech/python-cornea-ui-public-repo-template/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/coldsofttech/RayoHX-UI"
+Issues = "https://github.com/coldsofttech/RayoHX-UI/issues"
+Changelog = "https://github.com/coldsofttech/RayoHX-UI/blob/main/CHANGELOG.md"
 
 [dependency-groups]
-# The HTTP API (src/example_api): run on its own with `python -m example_api`, and mounted by the window.
+# The HTTP API (src/rayohx_api): run on its own with `python -m rayohx_api`, and mounted by the window.
 api = [
   "fastapi>=0.162.0",
   "pydantic-settings>=2.16.2",
   "uvicorn>=0.54.0",
 ]
-# The Windows window (src/example_ui).
+# The Windows window (src/rayohx_ui).
 ui = [
   "cornea-shell>=0.1.1 ; sys_platform == 'win32'",
 ]
@@ -74,22 +74,22 @@ installer = [
 # package. publisher is optional (the first author when omitted): the name shown in Add/Remove
 # Programs and the file properties.
 [tool.installer]
-publisher = "Example App"
-cli = "example-cli"
-ui = "example-ui"
-ui-target = "example_ui.__main__:main"
-api = "example_api"
+publisher = "RayoHX"
+cli = "rayohx-cli"
+ui = "rayohx-ui"
+ui-target = "rayohx_ui.__main__:main"
+api = "rayohx_api"
 
 [tool.hatch.version]
-path = "src/example_package/__init__.py"
+path = "src/rayohx_package/__init__.py"
 
 # `uv build` publishes the core library and the command line only. The API and the window ship in
 # the Windows installers instead. The wheel is built from the sdist, so both
 # list the same two packages.
 [tool.hatch.build.targets.sdist]
 include = [
-  "src/example_package",
-  "src/example_cli",
+  "src/rayohx_package",
+  "src/rayohx_cli",
   "/README.md",
   "/LICENSE",
   "/CHANGELOG.md",
@@ -97,8 +97,8 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 packages = [
-  "src/example_package",
-  "src/example_cli",
+  "src/rayohx_package",
+  "src/rayohx_cli",
 ]
 
 [tool.ruff]
@@ -121,7 +121,7 @@ files = ["src", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-m 'not integration' --strict-markers --cov=example_package --cov=example_cli --cov=example_api --cov=example_ui --cov-report=term-missing --cov-fail-under=80"
+addopts = "-m 'not integration' --strict-markers --cov=rayohx_package --cov=rayohx_cli --cov=rayohx_api --cov=rayohx_ui --cov-report=term-missing --cov-fail-under=80"
 markers = ["integration: slower end-to-end tests, run in CI but not by default or in pre-commit"]
 
 [tool.coverage.run]

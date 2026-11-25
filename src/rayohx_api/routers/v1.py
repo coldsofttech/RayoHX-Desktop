@@ -5,15 +5,15 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
 
-from example_api.auth import Principal, authenticate
-from example_api.schemas import (
+from rayohx_api.auth import Principal, authenticate
+from rayohx_api.schemas import (
     GreetingCreate,
     GreetingResponse,
     GreetingUpdate,
     HelloResponse,
     WhoAmIResponse,
 )
-from example_package import Greeting, GreetingNotFoundError, GreetingStore, greet
+from rayohx_package import Greeting, GreetingNotFoundError, GreetingStore, greet
 
 router = APIRouter(tags=["v1"])
 

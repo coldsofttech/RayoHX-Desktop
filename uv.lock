@@ -1500,7 +1500,7 @@ wheels = [
 ]
 
 [[package]]
-name = "python-cornea-ui-public-repo-template"
+name = "RayoHX-UI"
 source = { editable = "." }
 dependencies = [
     { name = "rich" },

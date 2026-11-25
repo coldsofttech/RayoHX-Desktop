@@ -1,5 +1,5 @@
-import example_package
+import rayohx_package
 
 
 def test_version_is_defined() -> None:
-    assert isinstance(example_package.__version__, str)
+    assert isinstance(rayohx_package.__version__, str)
