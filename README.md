@@ -1,10 +1,10 @@
-# RayoHX-UI
+# RayoHX-Desktop
 
-[![CI](https://github.com/coldsofttech/RayoHX-UI/actions/workflows/ci.yml/badge.svg)](https://github.com/coldsofttech/RayoHX-UI/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/RayoHX-UI)](https://pypi.org/project/RayoHX-UI/)
-[![Python versions](https://img.shields.io/pypi/pyversions/RayoHX-UI)](https://pypi.org/project/RayoHX-UI/)
+[![CI](https://github.com/coldsofttech/RayoHX-Desktop/actions/workflows/ci.yml/badge.svg)](https://github.com/coldsofttech/RayoHX-Desktop/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/RayoHX-Desktop)](https://pypi.org/project/RayoHX-Desktop/)
+[![Python versions](https://img.shields.io/pypi/pyversions/RayoHX-Desktop)](https://pypi.org/project/RayoHX-Desktop/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![License](https://img.shields.io/github/license/coldsofttech/RayoHX-UI)](LICENSE)
+[![License](https://img.shields.io/github/license/coldsofttech/RayoHX-Desktop)](LICENSE)
 [![Built with Cornea Shell](https://img.shields.io/badge/built%20with-Cornea%20Shell-blue)](https://github.com/coldsofttech/CorneaShell)
 [![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
@@ -20,7 +20,7 @@ A ready-to-use starting point for public Python tools that come with a command l
 ## What you get
 
 - A command line with `--help`, `--version`, `--verbose`, `--quiet`, `--no-color` and shell completion
-- A desktop window (Windows) with an example React app that talks to Python, started with `rayohx-ui`
+- A desktop window (Windows) with an example React app that talks to Python, started with `rayohx-desktop`
 - An HTTP API you can also run on its own, on any system
 - A separate typed library, so your logic is reused by the command line, the API and the window
 - Fast, reproducible setup with [uv](https://docs.astral.sh/uv/)
@@ -36,7 +36,7 @@ A ready-to-use starting point for public Python tools that come with a command l
 2. Run the **Init** workflow from the Actions tab, giving it a short lowercase name (for example `acme`) and a display title, and merge the pull request it opens. This fills in your owner and repository name and renames the example packages and commands to yours. See the [development guide](docs/development.md).
 3. Set the publisher name shown in Add/Remove Programs and the file properties with `publisher` under `[tool.installer]` in `pyproject.toml` (the first author is used if you leave it out). Then replace the example React app, API routes, window action and icon with your own, and the placeholder installer icon and wizard images in `brand/`.
 4. Add your contact details in `CODE_OF_CONDUCT.md`, delete `.github/workflows/init.yml`, and replace this description.
-5. Apply the repository protections by following the [setup guide](docs/repo-setup.md). Before your first release, work through the checklist in the [releasing guide](docs/releasing.md).
+5. Before your first release, work through the checklist in the [releasing guide](docs/releasing.md).
 6. Install dependencies and commit checks:
 
    ```bash
@@ -49,16 +49,16 @@ A ready-to-use starting point for public Python tools that come with a command l
 The Python package gives you the command line (`rayohx-cli`). Requires Python 3.11 or newer. The recommended way to install a tool is in its own isolated environment:
 
 ```bash
-uv tool install RayoHX-UI
+uv tool install RayoHX-Desktop
 ```
 
 Or with pipx:
 
 ```bash
-pipx install RayoHX-UI
+pipx install RayoHX-Desktop
 ```
 
-For the desktop window, use the Windows installer. The API and the window are not part of the Python package. Or use a ready-made installer from the [releases page](https://github.com/coldsofttech/RayoHX-UI/releases), where each file has a checksum in `SHA256SUMS.txt`:
+For the desktop window, use the Windows installer. The API and the window are not part of the Python package. Or use a ready-made installer from the [releases page](https://github.com/coldsofttech/RayoHX-Desktop/releases), where each file has a checksum in `SHA256SUMS.txt`:
 
 - **Windows:** the setup program installs for you or for everyone, and can add the command to your PATH. winget and Scoop are available once the maintainer enables them.
 - **Linux:** a `.deb` (Debian, Ubuntu) or `.rpm` (Fedora) package.
@@ -73,10 +73,10 @@ The window needs Windows 10 or 11 with the Microsoft Edge WebView2 runtime, whic
 ```console
 $ rayohx-cli hello Ada
 Hello, Ada!
-$ rayohx-ui
+$ rayohx-desktop
 ```
 
-`rayohx-ui` opens the app window. `rayohx-ui --no-window` prints an address you can open in a browser instead. On other systems it explains that the window needs Windows; the command line and the API work everywhere.
+`rayohx-desktop` opens the app window. `rayohx-desktop --no-window` prints an address you can open in a browser instead. On other systems it explains that the window needs Windows; the command line and the API work everywhere.
 
 See the [CLI reference](docs/cli.md) for every command, option and exit code, and the [API guide](docs/api.md) to run the API on its own.
 
@@ -85,12 +85,12 @@ See the [CLI reference](docs/cli.md) for every command, option and exit code, an
 ## Development
 
 ```bash
-git clone https://github.com/coldsofttech/RayoHX-UI.git
-cd RayoHX-UI
+git clone https://github.com/coldsofttech/RayoHX-Desktop.git
+cd RayoHX-Desktop
 uv sync
-npm ci --prefix src/rayohx_ui/ui
-npm run build --prefix src/rayohx_ui/ui
-uv run python -m rayohx_ui
+npm ci --prefix src/rayohx_desktop/ui
+npm run build --prefix src/rayohx_desktop/ui
+uv run python -m rayohx_desktop
 ```
 
 See the [development guide](docs/development.md) for testing, hot reload, linting and releasing.

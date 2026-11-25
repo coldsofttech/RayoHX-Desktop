@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from rayohx_package import __version__
-from rayohx_ui import app as ui_app
+from rayohx_desktop import app as ui_app
 
 
 class FakeShell:

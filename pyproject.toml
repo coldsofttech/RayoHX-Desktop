@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "RayoHX-UI"
+name = "RayoHX-Desktop"
 dynamic = ["version"]
 description = "Python tool with a command line, an HTTP API and a native Windows UI."
 keywords = ["cli", "api", "ui"]
@@ -35,9 +35,9 @@ dependencies = [
 rayohx-cli = "rayohx_cli.cli:run"
 
 [project.urls]
-Homepage = "https://github.com/coldsofttech/RayoHX-UI"
-Issues = "https://github.com/coldsofttech/RayoHX-UI/issues"
-Changelog = "https://github.com/coldsofttech/RayoHX-UI/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/coldsofttech/RayoHX-Desktop"
+Issues = "https://github.com/coldsofttech/RayoHX-Desktop/issues"
+Changelog = "https://github.com/coldsofttech/RayoHX-Desktop/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 # The HTTP API (src/rayohx_api): run on its own with `python -m rayohx_api`, and mounted by the window.
@@ -46,7 +46,7 @@ api = [
   "pydantic-settings>=2.16.2",
   "uvicorn>=0.54.0",
 ]
-# The Windows window (src/rayohx_ui).
+# The Windows window (src/rayohx_desktop).
 ui = [
   "cornea-shell>=0.1.1 ; sys_platform == 'win32'",
 ]
@@ -76,8 +76,8 @@ installer = [
 [tool.installer]
 publisher = "RayoHX"
 cli = "rayohx-cli"
-ui = "rayohx-ui"
-ui-target = "rayohx_ui.__main__:main"
+ui = "rayohx-desktop"
+ui-target = "rayohx_desktop.__main__:main"
 api = "rayohx_api"
 
 [tool.hatch.version]
@@ -121,7 +121,7 @@ files = ["src", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-m 'not integration' --strict-markers --cov=rayohx_package --cov=rayohx_cli --cov=rayohx_api --cov=rayohx_ui --cov-report=term-missing --cov-fail-under=80"
+addopts = "-m 'not integration' --strict-markers --cov=rayohx_package --cov=rayohx_cli --cov=rayohx_api --cov=rayohx_desktop --cov-report=term-missing --cov-fail-under=80"
 markers = ["integration: slower end-to-end tests, run in CI but not by default or in pre-commit"]
 
 [tool.coverage.run]

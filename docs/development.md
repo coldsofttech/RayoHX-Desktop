@@ -6,8 +6,8 @@
 src/rayohx_package/   library: all the logic, never prints or exits (typed)
 src/rayohx_cli/       Typer + Rich command line: parses input, calls the library, shows output
 src/rayohx_api/       FastAPI app: routers, schemas, errors, settings (see api.md)
-src/rayohx_ui/        Cornea Shell wiring and the `rayohx-ui` command (see ui.md)
-src/rayohx_ui/ui/     React + Vite frontend (JavaScript)
+src/rayohx_desktop/        Cornea Shell wiring and the `rayohx-desktop` command (see ui.md)
+src/rayohx_desktop/ui/     React + Vite frontend (JavaScript)
 tests/                 pytest tests, one folder per component: core/, cli/, api/, ui/ (each with integration/)
 installer/             PyInstaller specs, NSIS scripts, nfpm config, pinned tool versions (see packaging.md)
 scripts/               repository settings, OpenAPI export, installer build, release manifests
@@ -16,7 +16,7 @@ pyproject.toml         metadata, dependencies and tool configuration
 uv.lock                locked dependencies (commit this file)
 ```
 
-The example names are `rayohx_package` (library), `rayohx_cli` (command line package), `rayohx_api`, `rayohx_ui`, and the commands `rayohx-cli` and `rayohx-ui`. After creating a repo from this template, run the **Init** workflow with a short lowercase `name` (for example `acme`) and a display `title` (for example "Acme Studio"). It opens a pull request that:
+The example names are `rayohx_package` (library), `rayohx_cli` (command line package), `rayohx_api`, `rayohx_desktop`, and the commands `rayohx-cli` and `rayohx-desktop`. After creating a repo from this template, run the **Init** workflow with a short lowercase `name` (for example `acme`) and a display `title` (for example "Acme Studio"). It opens a pull request that:
 
 - replaces the owner and repository name;
 - renames the packages (`acme_package`, `acme_cli`, `acme_api`, `acme_ui`), the commands (`acme-cli`, `acme-ui`), the settings prefix (`ACME_API_`) and the app id, and replaces "RayoHX" with your title;
@@ -57,11 +57,11 @@ uv run mypy                # type check
 uv build                   # build the sdist and wheel (core library and command line only)
 ```
 
-Frontend, from `src/rayohx_ui/ui` (or with `--prefix`):
+Frontend, from `src/rayohx_desktop/ui` (or with `--prefix`):
 
 ```bash
 npm ci                     # install exactly what package-lock.json says
-npm run dev                # Vite dev server; `uv run python -m rayohx_ui --dev` wraps it in the window
+npm run dev                # Vite dev server; `uv run python -m rayohx_desktop --dev` wraps it in the window
 npm run build              # writes dist/, which the window serves and the Windows installer freezes in
 npm run lint && npm test   # ESLint, Vitest
 npm run format             # Prettier
@@ -72,7 +72,7 @@ Other useful commands:
 ```bash
 uv run python -m rayohx_api              # run the API on its own (see api.md)
 uv run python scripts/export_openapi.py   # regenerate docs/openapi.json
-uv run python -m rayohx_ui --no-window   # serve the UI for a browser
+uv run python -m rayohx_desktop --no-window   # serve the UI for a browser
 ```
 
 ## Integration tests
@@ -90,6 +90,6 @@ This section covers the PyPI side. Installers, signing and the package managers 
 Publishing uses [trusted publishing](https://docs.pypi.org/trusted-publishers/), so no API token is stored.
 
 1. On PyPI, add a trusted publisher for this repository: workflow `release.yml`, environment `pypi`.
-2. Create an environment named `pypi`. The settings script does this and restricts it to `v*` tags.
+2. Create an environment named `pypi`. Restrict it to `v*` tags.
 3. Bump `__version__` in `src/<package>/__init__.py` and update `CHANGELOG.md`.
 4. Publish a GitHub release tagged `v<version>`. The workflow fails if the tag and version differ.

@@ -74,7 +74,7 @@ def build_shell(*, dev: bool = False, window: bool = True) -> "Shell":
         source = Process(DEV_COMMAND, url=DEV_URL, cwd=UI_DIR, mode="proxy")
         security = Security(csp=DEV_CSP)
     else:
-        source = Static(package="rayohx_ui", package_path="ui/dist")
+        source = Static(package="rayohx_desktop", package_path="ui/dist")
 
     shell = Shell(
         source,

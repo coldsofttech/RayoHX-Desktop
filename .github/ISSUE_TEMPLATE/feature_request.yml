@@ -9,7 +9,7 @@ body:
       options:
         - Command line (rayohx-cli)
         - API
-        - UI window (rayohx-ui)
+        - UI window (rayohx-desktop)
         - Not sure
     validations:
       required: true
