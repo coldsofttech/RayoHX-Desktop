@@ -11,7 +11,7 @@ Cornea's `SecurityMiddleware` guards every mounted route, so the API adds no tok
 - a one-time start-up token is exchanged for an `HttpOnly`, `SameSite=Strict` session cookie
 - responses carry a strict content security policy and other protective headers
 
-`rayohx_ui` therefore mounts the routes with API-key checks switched off. Never expose these routes any other way.
+`rayohx_desktop` therefore mounts the routes with API-key checks switched off. Never expose these routes any other way.
 
 ## Standalone API
 

@@ -7,7 +7,7 @@ How the installers are built. For publishing them, see [releasing](releasing.md)
 | Product | Contents | Windows | Linux |
 | --- | --- | --- | --- |
 | CLI | `rayohx-cli` | `rayohx-cli-<version>.setup.exe`, and a portable `…-windows-x64.zip` | `.deb` and `.rpm` |
-| UI | `rayohx-ui` (window) | `rayohx-<version>.setup.exe` | none (the window needs Windows) |
+| UI | `rayohx-desktop` (window) | `rayohx-<version>.setup.exe` | none (the window needs Windows) |
 
 macOS gets no installer. Install the PyPI package, or use Homebrew once it is switched on.
 
@@ -23,7 +23,7 @@ scripts/build_installer.py   runs the steps above
 scripts/update_manifests.py  release notes and the Homebrew and Scoop manifests
 ```
 
-Names, version, icon and description are never repeated: executable names are the `[project.scripts]` keys, the version is `__version__`, the title is `TITLE` in `rayohx_ui/app.py`, the icon and setup art are in `brand/`, and the rest comes from `[project]`. Each of these is defined once and read by the installer files through `installer/projectinfo.py`, which takes the command and window names from `[project.scripts]` and `[tool.installer]` in `pyproject.toml`. Renaming the project (the Init workflow does it) therefore needs no edit in the installer files.
+Names, version, icon and description are never repeated: executable names are the `[project.scripts]` keys, the version is `__version__`, the title is `TITLE` in `rayohx_desktop/app.py`, the icon and setup art are in `brand/`, and the rest comes from `[project]`. Each of these is defined once and read by the installer files through `installer/projectinfo.py`, which takes the command and window names from `[project.scripts]` and `[tool.installer]` in `pyproject.toml`. Renaming the project (the Init workflow does it) therefore needs no edit in the installer files.
 
 ## Building locally
 
@@ -51,7 +51,7 @@ Results are in `dist/installer/`; the PyInstaller folders are in `build/installe
 Both specs make one-folder builds (no one-file build), each with its own executable and `lib/`.
 
 - `cli.spec` builds `rayohx-cli` alone, on any OS, with none of the window's libraries (about 37 MB).
-- `ui.spec` (Windows only) builds `rayohx-cli` and `rayohx-ui` side by side (about 69 MB). The window has no console, and the built frontend is frozen into `lib/`.
+- `ui.spec` (Windows only) builds `rayohx-cli` and `rayohx-desktop` side by side (about 69 MB). The window has no console, and the built frontend is frozen into `lib/`.
 - `common.py` holds what they share. The entry scripts are generated from the `[project.scripts]` targets.
 
 The Windows executables carry the icon and file properties (name, version, description), also taken from the project.

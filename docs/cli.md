@@ -7,7 +7,7 @@
 ```bash
 rayohx-cli --help          # installed script
 python -m rayohx_cli       # without relying on the script being on PATH
-uvx --from RayoHX-UI rayohx-cli --help   # one-off, no install
+uvx --from RayoHX-Desktop rayohx-cli --help   # one-off, no install
 ```
 
 ## Global options

@@ -1,6 +1,6 @@
 # Architecture
 
-How the pieces of this template fit together. For day-to-day commands, see [development](development.md). For one-time repository settings, see [repository setup](repo-setup.md).
+How the pieces of this template fit together. For day-to-day commands, see [development](development.md).
 
 ## Overview
 
@@ -32,8 +32,8 @@ flowchart LR
 src/rayohx_package/   typed library: all the logic, never prints or exits
 src/rayohx_cli/       Typer + Rich command line over the library
 src/rayohx_api/       FastAPI app over the library: routers, schemas, errors, settings
-src/rayohx_ui/        Cornea Shell wiring and the `rayohx-ui` command
-src/rayohx_ui/ui/     React + Vite frontend (JavaScript); `dist/` is built, not committed
+src/rayohx_desktop/        Cornea Shell wiring and the `rayohx-desktop` command
+src/rayohx_desktop/ui/     React + Vite frontend (JavaScript); `dist/` is built, not committed
 installer/               PyInstaller specs, NSIS scripts, nfpm config and pinned tool versions
 scripts/                 repository settings, OpenAPI export, installer build and manifest generation
 tests/<component>/     pytest unit tests with coverage (80% minimum), one folder each for core, cli, api and ui
@@ -63,15 +63,15 @@ flowchart LR
 flowchart LR
     W[Window: React] -->|fetch| S[Cornea Shell]
     S -->|mounts| A[rayohx_api]
-    S -->|actions| U[rayohx_ui]
+    S -->|actions| U[rayohx_desktop]
     B[Browser, other client] -->|HTTP| A
     A -->|calls| L[rayohx_package]
     U -->|calls| L
 ```
 
 - `rayohx_api` validates input, calls `rayohx_package` and shapes responses. It runs on its own on any system, or is mounted inside Cornea.
-- `rayohx_ui` only wires Cornea to the API and the library, and holds the `rayohx-ui` entry point. It is the one place there that shows output and sets exit codes.
-- `rayohx_package` and `rayohx_api` never import `rayohx_ui`, and `rayohx_package` never imports `rayohx_api`. The Windows-only dependency (`cornea-shell`) is imported lazily.
+- `rayohx_desktop` only wires Cornea to the API and the library, and holds the `rayohx-desktop` entry point. It is the one place there that shows output and sets exit codes.
+- `rayohx_package` and `rayohx_api` never import `rayohx_desktop`, and `rayohx_package` never imports `rayohx_api`. The Windows-only dependency (`cornea-shell`) is imported lazily.
 
 ## Workflows
 
@@ -90,7 +90,7 @@ CodeQL runs through GitHub's default setup rather than a workflow file.
 
 ## Branch governance
 
-The `main` ruleset in `.github/rulesets/main.json` is applied by `scripts/apply_repo_settings.py`. It requires:
+The `main` branch is protected by a ruleset. It requires:
 
 - a pull request with a code owner review and resolved conversations, squash merge only
 - the `ci` and `dependency-review` checks, with the branch up to date
@@ -107,4 +107,4 @@ Repository admins can bypass through a pull request so a solo maintainer is not 
 
 ## Template lifecycle
 
-GitHub copies files, not settings. A new repo therefore needs these steps: run **Init** with a name and title, which replaces the owner and repository name and renames the example packages and commands ([development](development.md)); replace the icon; run the settings script to apply protections and the ruleset; and optionally switch on signing and the package-manager channels ([releasing](releasing.md)).
+GitHub copies files, not settings. A new repo therefore needs these steps: run **Init** with a name and title, which replaces the owner and repository name and renames the example packages and commands ([development](development.md)); replace the icon; and optionally switch on signing and the package-manager channels ([releasing](releasing.md)).

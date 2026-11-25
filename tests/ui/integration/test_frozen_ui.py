@@ -20,8 +20,8 @@ STARTUP_SECONDS = 30
 
 @pytest.fixture
 def address(tmp_path: Path) -> Iterator[str]:
-    """Start ``rayohx-ui --no-window`` and return its first URL; stop it afterwards."""
-    exe = locate("rayohx-ui", "rayohx-ui")
+    """Start ``rayohx-desktop --no-window`` and return its first URL; stop it afterwards."""
+    exe = locate("rayohx-desktop", "rayohx-desktop")
     out = tmp_path / "out.txt"
     with out.open("w", encoding="utf-8") as stdout:
         try:
@@ -37,9 +37,9 @@ def address(tmp_path: Path) -> Iterator[str]:
                     yield str(json.loads(lines[0])["url"])
                     return
                 if process.poll() is not None:
-                    pytest.fail(f"rayohx-ui exited early: {out.read_text(encoding='utf-8')}")
+                    pytest.fail(f"rayohx-desktop exited early: {out.read_text(encoding='utf-8')}")
                 time.sleep(0.2)
-            pytest.fail("rayohx-ui did not report an address in time")
+            pytest.fail("rayohx-desktop did not report an address in time")
         finally:
             process.terminate()
             try:

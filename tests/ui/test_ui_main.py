@@ -1,7 +1,7 @@
 import pytest
 
-from rayohx_ui import __main__ as ui_main
-from rayohx_ui.app import UiUnavailableError
+from rayohx_desktop import __main__ as ui_main
+from rayohx_desktop.app import UiUnavailableError
 
 
 class Recorder:
@@ -52,4 +52,4 @@ def test_version(capsys: pytest.CaptureFixture[str]) -> None:
         ui_main.main(["--version"])
 
     assert exit_info.value.code == 0
-    assert capsys.readouterr().out.startswith("rayohx-ui ")
+    assert capsys.readouterr().out.startswith("rayohx-desktop ")

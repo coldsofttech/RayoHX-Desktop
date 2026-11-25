@@ -2,10 +2,10 @@
 #
 # One executable, with its dependencies in lib/ (the Python runtime and every dependency):
 #
-#   rayohx-ui.exe    the desktop window (no console); the React frontend (rayohx_ui/ui/dist)
+#   rayohx-desktop.exe    the desktop window (no console); the React frontend (rayohx_desktop/ui/dist)
 #                     is frozen into lib/
 #
-# One-folder build on purpose (no one-file build). Names, version and icon: see common.py. Build the frontend first (npm ci && npm run build in src/rayohx_ui/ui):
+# One-folder build on purpose (no one-file build). Names, version and icon: see common.py. Build the frontend first (npm ci && npm run build in src/rayohx_desktop/ui):
 #   uv sync --group installer
 #   uv run pyinstaller installer/pyinstaller/ui.spec --noconfirm \
 #       --distpath build/installer --workpath build/installer-work/ui

@@ -82,5 +82,4 @@ jobs:
 
           - delete \`.github/workflows/init.yml\`
           - replace the icon in \`src/${UI_PACKAGE}/ui/public/icon.png\`
-          - add an email to the author in \`pyproject.toml\` and your contact details in \`CODE_OF_CONDUCT.md\`
-          - apply the protections from \`docs/repo-setup.md\`"
+          - add an email to the author in \`pyproject.toml\` and your contact details in \`CODE_OF_CONDUCT.md\`"

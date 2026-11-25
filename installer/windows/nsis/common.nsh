@@ -3,7 +3,7 @@
 ; A product file defines what is specific to it, then includes this file:
 ;
 ;   GUID          stable id of the product (upgrades replace an earlier install), "{...}"
-;   MAIN_EXE      the program the Start Menu shortcut starts, e.g. "rayohx-ui.exe"
+;   MAIN_EXE      the program the Start Menu shortcut starts, e.g. "rayohx-desktop.exe"
 ;   HAS_PATH      optional: offer to add the install folder to PATH (command line product)
 ;   HAS_DESKTOP   optional: offer a desktop shortcut and "run now" (window product)
 ;   INSTALL_SUBDIR  "CLI" or "UI": the product's folder under <PUBLISHER>\<FOLDER_NAME>, so the
