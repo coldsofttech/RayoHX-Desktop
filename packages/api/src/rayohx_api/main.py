@@ -17,8 +17,8 @@ def create_app(*, embedded: bool = False) -> FastAPI:
     """
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
-    from rayohx import __version__
 
+    from rayohx_api import __version__
     from rayohx_api.auth import authenticate, embedded_principal
     from rayohx_api.config import get_settings
     from rayohx_api.errors import register_error_handlers
