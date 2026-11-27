@@ -1338,7 +1338,7 @@
   "info": {
     "description": "HTTP API for inspecting and downloading HLS streams with **rayohx**.",
     "title": "rayohx-api",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "openapi": "3.1.0",
   "paths": {
