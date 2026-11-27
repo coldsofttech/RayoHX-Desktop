@@ -1,0 +1,90 @@
+[build-system]
+requires = ["setuptools>=77", "nuitka>=4.3", "mypy>=1.13"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rayohx-api"
+dynamic = ["version"]
+description = "RayoHX HTTP API for working with HLS streams."
+readme = "README.md"
+requires-python = ">=3.15"
+license = "Apache-2.0"
+authors = [{ name = "coldsofttech" }]
+classifiers = [
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.15",
+  "Typing :: Typed",
+]
+dependencies = [
+  "rayohx>=0.1.1",
+  "fastapi>=0.162.4",
+  "pydantic-settings>=2.16.3",
+  "uvicorn>=0.32",
+]
+
+[project.scripts]
+rayohx-api = "rayohx_api.__main__:serve"
+
+[project.urls]
+Homepage = "https://github.com/coldsofttech/RayoHX-Desktop"
+Issues = "https://github.com/coldsofttech/RayoHX-Desktop/issues"
+Changelog = "https://github.com/coldsofttech/RayoHX-Desktop/blob/main/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = { attr = "rayohx_api.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+# Compiled (.pyd/.so) wheels for a release. PYD_BUILD=1 makes setup.py compile the package with Nuitka.
+[tool.cibuildwheel]
+build = "cp315-*"
+environment = { PYD_BUILD = "1" }
+test-requires = "pytest httpx2 rayohx-pytest@git+https://github.com/coldsofttech/RayoHX@pytest-v0.1.0#subdirectory=packages/pytest"
+test-command = "pytest -o addopts= {project}/tests/unit"
+
+# 64-bit only, same as the CLI: some dependencies publish no 32-bit Windows wheel.
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+
+[dependency-groups]
+dev = [
+  "httpx2>=2.16.2",
+  "mypy>=1.13",
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+  "pytest-xdist>=3.6",
+  "rayohx-pytest>=0.1.0",
+  "ruff>=0.17.4",
+  "schemathesis>=4.33.2",
+]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["B", "C4", "E", "F", "I", "PT", "RUF", "S", "SIM", "T20", "UP", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S603"]  # assert, subprocess and fake passwords are fine in tests
+"scripts/**" = ["T201"]  # scripts print what they did
+
+[tool.mypy]
+strict = true
+explicit_package_bases = true
+mypy_path = "src"
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not integration' --strict-markers --cov=rayohx_api --cov-report=term-missing --cov-fail-under=80"
+markers = ["integration: slower end-to-end tests, run in CI but not by default or in pre-commit"]
+
+[tool.coverage.run]
+branch = true
