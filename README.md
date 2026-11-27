@@ -1,104 +1,115 @@
-# RayoHX-Desktop
+# RayoHX Desktop
 
 [![CI](https://github.com/coldsofttech/RayoHX-Desktop/actions/workflows/ci.yml/badge.svg)](https://github.com/coldsofttech/RayoHX-Desktop/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/RayoHX-Desktop)](https://pypi.org/project/RayoHX-Desktop/)
-[![Python versions](https://img.shields.io/pypi/pyversions/RayoHX-Desktop)](https://pypi.org/project/RayoHX-Desktop/)
+[![Security](https://github.com/coldsofttech/RayoHX-Desktop/actions/workflows/security.yml/badge.svg)](https://github.com/coldsofttech/RayoHX-Desktop/actions/workflows/security.yml)
+[![Release](https://img.shields.io/github/v/release/coldsofttech/RayoHX-Desktop)](https://github.com/coldsofttech/RayoHX-Desktop/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows-blue)](#install)
+[![React](https://img.shields.io/badge/React-UI-61dafb)](https://react.dev/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![License](https://img.shields.io/github/license/coldsofttech/RayoHX-Desktop)](LICENSE)
-[![Built with Cornea Shell](https://img.shields.io/badge/built%20with-Cornea%20Shell-blue)](https://github.com/coldsofttech/CorneaShell)
-[![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Typer](https://img.shields.io/badge/Typer-CLI-black)](https://typer.tiangolo.com/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
-[![PyInstaller](https://img.shields.io/badge/PyInstaller-installers-blue)](https://pyinstaller.org/)
-[![NSIS](https://img.shields.io/badge/NSIS-Windows%20setup-blue)](https://nsis.sourceforge.io/)
-[![nfpm](https://img.shields.io/badge/nfpm-deb%20%26%20rpm-blue)](https://nfpm.goreleaser.com/)
+[![License](https://img.shields.io/github/license/coldsofttech/RayoHX-Desktop)](LICENSE)
 
-A ready-to-use starting point for public Python tools that come with a command line, an HTTP API and a desktop window. The window runs a React app on Windows, hosted by [Cornea Shell](https://github.com/coldsofttech/CorneaShell). It also includes automated testing, linting, one-step releases to PyPI, and the community and security files a public repository needs.
+Download HLS streams from a desktop window on Windows, without the terminal.
 
-## What you get
-
-- A command line with `--help`, `--version`, `--verbose`, `--quiet`, `--no-color` and shell completion
-- A desktop window (Windows) with an example React app that talks to Python, started with `rayohx-desktop`
-- An HTTP API you can also run on its own, on any system
-- A separate typed library, so your logic is reused by the command line, the API and the window
-- Fast, reproducible setup with [uv](https://docs.astral.sh/uv/)
-- Linting, formatting and type checking before every commit and in CI
-- Automated tests on Python 3.11 to 3.15 (Ubuntu) and 3.11 (Windows and macOS)
-- Publishing to PyPI when you create a GitHub release, with no stored tokens
-- Contribution, conduct, support and security-reporting guidelines
-- Issue forms, a pull request template and automated dependency updates
-
-## Getting started
-
-1. Click **Use this template** on GitHub and create your new repository.
-2. Run the **Init** workflow from the Actions tab, giving it a short lowercase name (for example `acme`) and a display title, and merge the pull request it opens. This fills in your owner and repository name and renames the example packages and commands to yours. See the [development guide](docs/development.md).
-3. Set the publisher name shown in Add/Remove Programs and the file properties with `publisher` under `[tool.installer]` in `pyproject.toml` (the first author is used if you leave it out). Then replace the example React app, API routes, window action and icon with your own, and the placeholder installer icon and wizard images in `brand/`.
-4. Add your contact details in `CODE_OF_CONDUCT.md`, delete `.github/workflows/init.yml`, and replace this description.
-5. Before your first release, work through the checklist in the [releasing guide](docs/releasing.md).
-6. Install dependencies and commit checks:
-
-   ```bash
-   uv sync
-   uv run pre-commit install --hook-type pre-commit --hook-type post-commit
-   ```
-
-## Installation
-
-The Python package gives you the command line (`rayohx-cli`). Requires Python 3.11 or newer. The recommended way to install a tool is in its own isolated environment:
-
-```bash
-uv tool install RayoHX-Desktop
+```sh
+rayohxd
 ```
 
-Or with pipx:
+![The RayoHX window with the Add a stream form](docs/guides/images/quick.png)
 
-```bash
-pipx install RayoHX-Desktop
+## What is RayoHX?
+
+RayoHX is a tool for saving HLS streams (`.m3u8` links) as ordinary video files. Many websites play
+video as a stream made of many small pieces, which is awkward to save by hand. Give RayoHX the
+stream's web address and it looks at what the stream offers, lets you choose the quality, audio and
+subtitles you want, and puts everything together into a single file you can keep and play anywhere.
+
+RayoHX comes in several forms that share the same engine: a Python library, a command line, a
+Docker image and this **desktop window for Windows**.
+
+## How it helps
+
+- **No terminal needed**: paste a stream's address into the window and see what it offers before
+  you download anything
+- **Get exactly what you want**: pick a quality with one click, or choose the exact stream, size,
+  codec and the audio and subtitle tracks
+- **Nothing else to run**: everything the window needs is built in and starts with it
+- **Finish what you started**: your download folder and default options are remembered between runs,
+  and a failed download can be retried or replaced with one button
+- **Easy to follow**: downloads update live, each one has a log you can read, and there are light and
+  dark themes
+
+## What you can do
+
+- Download one stream, several at once, or a playlist you paste in as text
+- Use every download option RayoHX has: network, stream selection, storage, output and engine settings
+- Save default options once and have them apply to every new download
+- Choose where downloads are saved, and open that folder in Explorer from the window
+- Use files from your computer, such as cookie files and certificates, with the usual system dialogs
+- Clear finished downloads, and keep your list between restarts (a download cut short by closing the
+  app shows as failed, so you can retry it)
+
+## Install
+
+You need Windows 10 or 11, which already include the Microsoft Edge WebView2 runtime the window uses,
+and Python 3.15 or newer. The window is not published to PyPI and there is no installer: download the
+two compiled wheels, `rayohx_desktop` and `rayohx_api`, from the newest
+[release](https://github.com/coldsofttech/RayoHX-Desktop/releases) and install them together. The
+`rayohx` library comes from PyPI for you.
+
+```sh
+pip install rayohx_api-*.whl rayohx_desktop-*.whl
 ```
 
-For the desktop window, use the Windows installer. The API and the window are not part of the Python package. Or use a ready-made installer from the [releases page](https://github.com/coldsofttech/RayoHX-Desktop/releases), where each file has a checksum in `SHA256SUMS.txt`:
+Each release lists SHA-256 checksums in `SHA256SUMS.txt`, so you can check your download:
 
-- **Windows:** the setup program installs for you or for everyone, and can add the command to your PATH. winget and Scoop are available once the maintainer enables them.
-- **Linux:** a `.deb` (Debian, Ubuntu) or `.rpm` (Fedora) package.
-- **macOS:** Homebrew, once the maintainer enables it.
-
-See the [releasing guide](docs/releasing.md) for the install commands of each.
-
-The window needs Windows 10 or 11 with the Microsoft Edge WebView2 runtime, which is already installed on current versions. You do not need Node to use the installed tool.
-
-## Usage
-
-```console
-$ rayohx-cli hello Ada
-Hello, Ada!
-$ rayohx-desktop
+```sh
+sha256sum --check SHA256SUMS.txt
 ```
 
-`rayohx-desktop` opens the app window. `rayohx-desktop --no-window` prints an address you can open in a browser instead. On other systems it explains that the window needs Windows; the command line and the API work everywhere.
+## Open the window
 
-See the [CLI reference](docs/cli.md) for every command, option and exit code, and the [API guide](docs/api.md) to run the API on its own.
-
-> After renaming the commands, update the examples above. Once you have written your tool's real behavior, replace this example with a short walkthrough.
-
-## Development
-
-```bash
-git clone https://github.com/coldsofttech/RayoHX-Desktop.git
-cd RayoHX-Desktop
-uv sync
-npm ci --prefix src/rayohx_desktop/ui
-npm run build --prefix src/rayohx_desktop/ui
-uv run python -m rayohx_desktop
+```sh
+rayohxd                 # open the window
+rayohxd --no-window     # serve the interface for a browser instead of a window
+rayohxd --version       # show the installed version
+rayohxd --help
 ```
 
-See the [development guide](docs/development.md) for testing, hot reload, linting and releasing.
+The [window guide](docs/guides/ui.md) walks through adding a stream, following downloads and the
+settings.
 
-## Contributing
+## Use it from your own programs
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Please report security issues privately as described in [SECURITY.md](SECURITY.md).
+The HTTP API the window is built on can also run on its own, so scripts and other programs can inspect
+playlists and start downloads over HTTP. It is for Windows too and comes in the same release.
+
+```sh
+set RAYOHX_API_API_KEYS=["my-secret-key"]
+rayohx-api
+```
+
+It listens on `http://127.0.0.1:8000` and needs an API key unless you turn authentication off for
+local development. The [API guide](docs/api.md) lists every setting and endpoint.
+
+## Other ways to use RayoHX
+
+| What it is | Where |
+|---|---|
+| The `rayohx` command, installed with Python | [`rayohx-cli`](https://pypi.org/project/rayohx-cli/) |
+| Python library, to use RayoHX inside your own programs | [`rayohx`](https://pypi.org/project/rayohx/) |
+| The command as a container image | `ghcr.io/coldsofttech/rayohx` |
+
+## Learn more
+
+- [Window guide](docs/guides/ui.md): adding streams, downloads and settings
+- [API guide](docs/api.md): endpoints, settings and authentication
+- [Security](docs/security.md): how the window and the API protect your data
+- [Documentation index](docs/README.md): architecture, development, testing, releasing and packaging
+- [Changelog](CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md) · [Security policy](SECURITY.md) · [Support](SUPPORT.md)
+- [Report a problem](https://github.com/coldsofttech/RayoHX-Desktop/issues)
 
 ## License
 
-Released under the [MIT License](LICENSE).
+Apache-2.0. See [LICENSE](LICENSE).

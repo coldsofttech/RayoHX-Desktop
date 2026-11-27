@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rayohx-desktop"
-version = "0.1.0"
+dynamic = ["version"]
 description = "RayoHX native window, with the HTTP API built in."
 readme = "README.md"
 requires-python = ">=3.15"
@@ -29,6 +29,9 @@ rayohxd = "rayohx_desktop.__main__:main"
 Homepage = "https://github.com/coldsofttech/RayoHX-Desktop"
 Issues = "https://github.com/coldsofttech/RayoHX-Desktop/issues"
 Changelog = "https://github.com/coldsofttech/RayoHX-Desktop/blob/main/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = { attr = "rayohx_desktop.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["src"]

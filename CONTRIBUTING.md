@@ -17,15 +17,17 @@ Open an issue using one of the provided forms. Search existing issues first. For
 
 ## Checks by area
 
+Run these from the repository root. Scope them to the package you changed rather than running everything.
+
 | You changed | Run |
 | --- | --- |
-| Any Python | `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .` and `uv run mypy` |
-| The command line | `uv run pytest tests/cli`; if commands or options changed, regenerate `docs/cli-reference.md` (the command is in `docs/cli.md`) |
-| The API | `uv run pytest tests/api`, then `uv run python scripts/export_openapi.py` and commit `docs/openapi.json` |
-| The frontend (`src/<ui package>/ui`) | `npm ci`, `npm run lint`, `npm test` and `npm run build` in that folder |
-| The installers (`installer/`) | `uv sync --group installer`, then `uv run python scripts/build_installer.py --smoke` |
+| Any Python | `uv run ruff check packages/<package>`, `uv run ruff format --check packages/<package>`, `uv run mypy packages/<package>/src` and `uv run pytest packages/<package>/tests --no-cov` |
+| The API (`packages/api`) | The Python checks above, then `uv run python packages/api/scripts/export_openapi.py` and commit `docs/openapi.json` |
+| The window (`packages/desktop`) | The Python checks above for `desktop` |
+| The front end (`packages/desktop/src/rayohx_desktop/ui`) | `npm ci`, `npm run lint`, `npm test` and `npm run build` in that folder |
+| A workflow | `actionlint` passes (it runs in pre-commit) |
 
-You need Node for frontend work and Windows only to open the real window. The UI's Python tests use a stand-in for the window and run anywhere. See `docs/development.md` for the details.
+You need Windows (the API and the window are for Windows only) and Node for front end work. The window's Python tests use a stand-in for the window, so no window opens. The tests use the shared `rayohx-pytest` plugin from the [RayoHX](https://github.com/coldsofttech/RayoHX) repository, which `uv sync` installs from git. See [development](docs/development.md) and [testing](docs/testing.md).
 
 ## Pull request rules
 

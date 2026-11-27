@@ -1,40 +1,54 @@
 name: Audit
 
-# Checks locked dependencies for known vulnerabilities. Dependency review only covers
-# pull requests, so this catches advisories published against dependencies already in use.
+# Checks locked dependencies for known vulnerabilities. Dependency review only covers pull
+# requests, so this catches advisories published against dependencies already in use.
+# Covers the runtime and development dependencies of the desktop window and API packages, and the
+# npm dependencies of the interface.
 on:
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
   pull_request:
-    paths: [uv.lock, '**/package-lock.json']
+    paths: [uv.lock, packages/desktop/src/rayohx_desktop/ui/package-lock.json]
 
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
+env:
+  UI_DIR: packages/desktop/src/rayohx_desktop/ui
+
 jobs:
   pip-audit:
-    runs-on: ubuntu-latest
+    name: pip-audit
+    runs-on: windows-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
-      - name: Export locked dependencies
-        run: uv export --locked --no-emit-project --no-hashes --format requirements-txt -o requirements-audit.txt
-      - name: Audit
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Set up uv
+        uses: ./.github/actions/setup-uv
+        with:
+          sync: "false"
+      - name: Export the locked dependencies
+        run: uv export --locked --all-packages --all-groups --no-emit-workspace --no-hashes --format requirements-txt -o requirements-audit.txt
+      - name: Audit the Python dependencies
         run: uvx pip-audit --requirement requirements-audit.txt --no-deps --disable-pip
 
   npm-audit:
-    runs-on: ubuntu-latest
+    name: npm audit
+    runs-on: windows-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
-      - name: Read project names
-        shell: bash
-        run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: actions/setup-node@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
         with:
           node-version-file: ${{ env.UI_DIR }}/.nvmrc
-      - name: Audit
-        working-directory: ${{ env.UI_DIR }}
+      - name: Audit the npm dependencies
         run: npm audit --audit-level=high
+        working-directory: ${{ env.UI_DIR }}

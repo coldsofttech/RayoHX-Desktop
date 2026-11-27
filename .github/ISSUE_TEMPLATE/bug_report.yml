@@ -7,10 +7,9 @@ body:
     attributes:
       label: Which part is affected?
       options:
-        - Command line (rayohx-cli)
         - API
-        - UI window (rayohx-desktop)
-        - Not sure
+        - Desktop window (rayohx-desktop)
+        - Not Sure
     validations:
       required: true
   - type: textarea
@@ -38,7 +37,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Operating system and version, Python version, and how you installed it. For the UI window, also say if the Microsoft Edge WebView2 runtime is installed.
+      description: Operating system and version, Python version, and how you installed it. For the desktop window, also say if the Microsoft Edge WebView2 runtime is installed.
       placeholder: |
         Windows 11, Python 3.13, installed with uv tool install
   - type: textarea

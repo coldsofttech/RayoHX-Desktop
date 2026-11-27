@@ -1,0 +1,22 @@
+[freeze]
+name = "rayohxd"
+title = "RayoHX Desktop"
+publisher = "ColdSoft Technologies"
+compiled = ["rayohx", "rayohx-api", "rayohx-desktop"]
+metadata = [
+    "rayohx", "rayohx-api", "rayohx-desktop", "cornea-shell", "pywebview", "fastapi", "starlette",
+    "uvicorn", "pydantic", "pydantic-settings",
+]
+hidden-imports = ["sqlite3"]
+excludes = [
+    "tkinter", "pytest", "setuptools", "pkg_resources", "mypy", "hypothesis", "requests",
+    "charset_normalizer", "werkzeug", "markupsafe",
+]
+collect = [
+    "cornea", "webview", "clr_loader", "pythonnet", "proxy_tools", "bottle", "uvicorn",
+    "fastapi", "starlette", "pydantic", "pydantic_settings", "pydantic_core", "anyio", "h11",
+]
+compile = [
+    "cornea", "webview", "clr_loader", "pythonnet", "proxy_tools", "uvicorn", "fastapi",
+    "starlette", "pydantic", "pydantic_core", "pydantic_settings", "anyio", "h11",
+]
