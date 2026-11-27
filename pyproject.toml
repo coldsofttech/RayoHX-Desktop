@@ -25,6 +25,7 @@ dev = [
   "ruff>=0.17.4",
   "schemathesis>=4.33.2",
   "types-setuptools>=84.2.0.20261122",
+  "pip-licenses>=5.5.5",
 ]
 
 [tool.ruff]
