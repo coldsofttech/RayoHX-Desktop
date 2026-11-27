@@ -1,7 +1,11 @@
 version: 2
 updates:
+  # The workflows are in /.github/workflows; each composite action has its own folder under
+  # /.github/actions.
   - package-ecosystem: github-actions
-    directory: /
+    directories:
+      - /
+      - /.github/actions/*
     schedule:
       interval: weekly
     cooldown:
@@ -12,8 +16,12 @@ updates:
       actions:
         patterns: ["*"]
 
+  # The workspace root (uv.lock) and the `rayohx>=` requirement in each package.
   - package-ecosystem: uv
-    directory: /
+    directories:
+      - /
+      - /packages/api
+      - /packages/desktop
     schedule:
       interval: weekly
     cooldown:
@@ -25,7 +33,7 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: npm
-    directory: /src/rayohx_desktop/ui
+    directory: /packages/desktop/src/rayohx_desktop/ui
     schedule:
       interval: weekly
     cooldown:
@@ -35,3 +43,13 @@ updates:
     groups:
       npm:
         patterns: ["*"]
+
+  # The pinned PyInstaller version of the portable app (installer/pyinstaller/requirements.txt).
+  - package-ecosystem: pip
+    directory: /installer/pyinstaller
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(deps)"

@@ -1,0 +1,311 @@
+[
+  {
+    "id": "selection",
+    "title": "Stream selection",
+    "fields": [
+      {
+        "key": "quality",
+        "label": "Quality",
+        "type": "select",
+        "options": "qualities",
+        "defaultsOnly": true
+      },
+      {
+        "key": "variant",
+        "label": "Stream",
+        "type": "number",
+        "hint": "Pick a stream by its number. Cannot be combined with the other stream filters."
+      },
+      {
+        "key": "resolution",
+        "label": "Size",
+        "type": "text",
+        "hint": "For example 1280x720.",
+        "filter": true
+      },
+      {
+        "key": "max_resolution",
+        "label": "Highest height",
+        "type": "text",
+        "hint": "For example 1080p.",
+        "filter": true
+      },
+      {
+        "key": "bandwidth",
+        "label": "Bitrate (kbps)",
+        "type": "number",
+        "scale": 1000,
+        "filter": true
+      },
+      {
+        "key": "max_bitrate",
+        "label": "Highest bitrate (kbps)",
+        "type": "number",
+        "scale": 1000,
+        "filter": true
+      },
+      {
+        "key": "codec",
+        "label": "Codec",
+        "type": "select",
+        "options": "codecs",
+        "filter": true
+      },
+      {
+        "key": "video_range",
+        "label": "Range",
+        "type": "select",
+        "options": "video-ranges",
+        "filter": true
+      },
+      {
+        "key": "audio_names",
+        "label": "Audio track names",
+        "type": "list",
+        "tracks": ["audio_names"],
+        "offWith": "video_only"
+      },
+      {
+        "key": "subtitle_names",
+        "label": "Subtitle track names",
+        "type": "list",
+        "tracks": ["subtitle_names"],
+        "offWith": "video_only"
+      },
+      {
+        "key": "video_only",
+        "label": "Video only (no separate audio or subtitles)",
+        "type": "bool",
+        "tracks": ["audio_names", "subtitle_names"]
+      }
+    ]
+  },
+  {
+    "id": "network",
+    "title": "Network",
+    "fields": [
+      {
+        "key": "headers",
+        "label": "Headers",
+        "type": "lines",
+        "hint": "One per line, as Name: value.",
+        "pairs": ":",
+        "group": "Request"
+      },
+      {
+        "key": "cookies",
+        "label": "Cookies",
+        "type": "lines",
+        "hint": "One per line, as name=value.",
+        "pairs": "=",
+        "group": "Request"
+      },
+      {
+        "key": "user_agent",
+        "label": "User agent",
+        "type": "preset",
+        "presets": "user-agents",
+        "group": "Request"
+      },
+      { "key": "referer", "label": "Referer", "type": "text", "group": "Request" },
+      { "key": "origin", "label": "Origin", "type": "text", "group": "Request" },
+      {
+        "key": "cookie_file",
+        "label": "Cookie file (cookies.txt)",
+        "type": "text",
+        "local": true,
+        "types": ["Cookie files (*.txt)", "All files (*.*)"],
+        "group": "Request"
+      },
+      { "key": "proxy.url", "label": "Proxy", "type": "proxy", "group": "Proxy" },
+      {
+        "key": "proxy.username",
+        "label": "Proxy user",
+        "type": "text",
+        "noDefault": true,
+        "group": "Proxy"
+      },
+      {
+        "key": "proxy.password",
+        "label": "Proxy password",
+        "type": "secret",
+        "noDefault": true,
+        "group": "Proxy"
+      },
+      {
+        "key": "env_proxy",
+        "label": "Use proxy settings from the environment",
+        "type": "bool",
+        "group": "Proxy"
+      },
+      { "key": "retries", "label": "Retries", "type": "number", "group": "Connection" },
+      { "key": "backoff", "label": "Back-off factor", "type": "number", "group": "Connection" },
+      {
+        "key": "max_redirects",
+        "label": "Most redirects",
+        "type": "number",
+        "group": "Connection"
+      },
+      {
+        "key": "connect_timeout",
+        "label": "Connect timeout (s)",
+        "type": "number",
+        "group": "Connection"
+      },
+      {
+        "key": "read_timeout",
+        "label": "Read timeout (s)",
+        "type": "number",
+        "group": "Connection"
+      },
+      {
+        "key": "timeout",
+        "label": "Total time allowed (s)",
+        "type": "number",
+        "group": "Connection"
+      },
+      {
+        "key": "rate_limit",
+        "label": "Speed limit (KB/s)",
+        "type": "number",
+        "scale": 1024,
+        "group": "Connection"
+      },
+      {
+        "key": "ca_bundle",
+        "label": "CA bundle",
+        "type": "text",
+        "local": true,
+        "types": ["Certificates (*.pem;*.crt;*.cer)", "All files (*.*)"],
+        "group": "Security"
+      },
+      {
+        "key": "client_cert",
+        "label": "Client certificate",
+        "type": "text",
+        "local": true,
+        "types": ["Certificates (*.pem;*.crt;*.cer)", "All files (*.*)"],
+        "group": "Security"
+      },
+      {
+        "key": "client_key",
+        "label": "Client key",
+        "type": "text",
+        "local": true,
+        "types": ["Keys (*.pem;*.key)", "All files (*.*)"],
+        "group": "Security"
+      },
+      {
+        "key": "client_key_password",
+        "noDefault": true,
+        "label": "Client key password",
+        "type": "secret",
+        "group": "Security"
+      },
+      {
+        "key": "credential_hosts",
+        "label": "Hosts that may get credentials",
+        "type": "list",
+        "group": "Security"
+      },
+      {
+        "key": "insecure",
+        "label": "Do not verify TLS certificates (unsafe)",
+        "type": "bool",
+        "group": "Security"
+      }
+    ]
+  },
+  {
+    "id": "output",
+    "title": "Output",
+    "fields": [
+      {
+        "key": "format",
+        "label": "Format",
+        "type": "select",
+        "options": "output-formats"
+      },
+      { "key": "directory", "label": "Folder (inside the download folder)", "type": "text" },
+      {
+        "key": "remux_backend",
+        "label": "Remux with",
+        "type": "select",
+        "options": "remux-backends"
+      },
+      { "key": "ffmpeg", "label": "FFmpeg path", "type": "text", "local": true },
+      { "key": "overwrite", "label": "Replace files that already exist", "type": "bool" },
+      { "key": "validate", "label": "Check the finished file", "type": "bool", "fallback": true }
+    ]
+  },
+  {
+    "id": "storage",
+    "title": "Storage",
+    "fields": [
+      {
+        "key": "strategy",
+        "label": "Strategy",
+        "type": "select",
+        "options": "storage-strategies",
+        "group": "Where files go"
+      },
+      {
+        "key": "workspace",
+        "label": "Working folder (inside the download folder)",
+        "type": "text",
+        "group": "Where files go"
+      },
+      {
+        "key": "buffer_bytes",
+        "label": "Memory buffer (MB)",
+        "type": "number",
+        "scale": 1048576,
+        "group": "Limits"
+      },
+      {
+        "key": "max_temp_bytes",
+        "label": "Most temporary data (MB)",
+        "type": "number",
+        "scale": 1048576,
+        "group": "Limits"
+      },
+      {
+        "key": "reserve_bytes",
+        "label": "Free space to keep (MB)",
+        "type": "number",
+        "scale": 1048576,
+        "group": "Limits"
+      },
+      {
+        "key": "space_check",
+        "label": "Check free space",
+        "type": "bool",
+        "fallback": true,
+        "group": "Safety"
+      },
+      {
+        "key": "keep_state",
+        "label": "Keep resume state after a failure",
+        "type": "bool",
+        "fallback": true,
+        "group": "Safety"
+      }
+    ]
+  },
+  {
+    "id": "engine",
+    "title": "Engine",
+    "fields": [
+      { "key": "concurrency", "label": "Parallel segments", "type": "number" },
+      { "key": "resume", "label": "Resume partial downloads", "type": "bool", "fallback": true },
+      {
+        "key": "allow_file_keys",
+        "label": "Allow file: key addresses",
+        "type": "bool",
+        "local": true,
+        "types": ["Programs (*.exe)", "All files (*.*)"],
+        "hint": "Lets a stream make RayoHX read key files from this machine."
+      }
+    ]
+  }
+]

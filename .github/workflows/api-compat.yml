@@ -16,11 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the base branch
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           path: base
-      - uses: actions/checkout@v7
+      - name: Check out the pull request
+        uses: actions/checkout@v7
         with:
           path: head
       - name: Check for breaking changes

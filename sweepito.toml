@@ -8,7 +8,7 @@ risk = "safe"
 enable = ["python.hypothesis"]
 # Exclusions always win over cleanup rules. Keep the uv environment and installed UI dependencies
 # between commits.
-exclude = [".venv/", "node_modules/"]
+exclude = [".venv/", ".venv-*/", "node_modules/"]
 
 [hook]
 quiet = true

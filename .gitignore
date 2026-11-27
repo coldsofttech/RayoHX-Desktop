@@ -30,6 +30,7 @@ desktop.ini
 __pycache__/
 *.py[cod]
 .venv/
+.venv-*/
 build/
 dist/
 *.egg-info/
@@ -45,5 +46,22 @@ coverage.xml
 
 .temp/
 
+# Compiled packages: Nuitka build folders and in-place extension modules, cibuildwheel output
+*.build/
+*.dist/
+*.onefile-build/
+*.pyd
+*.so
+wheelhouse/
+
 # Node (rayohx_desktop/ui); its build output is covered by dist/ above
 node_modules/
+
+# Smoke-test scripts (scripts/smoke): virtual environment, built wheels and server data
+scripts/smoke/.venv/
+scripts/smoke/wheels/
+scripts/smoke/data/
+scripts/smoke/*.log
+
+# Output of scripts/build.py
+.freeze/

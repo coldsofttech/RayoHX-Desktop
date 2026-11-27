@@ -6,3 +6,6 @@ contact_links:
   - name: Questions and support
     url: https://github.com/coldsofttech/RayoHX-Desktop/blob/main/SUPPORT.md
     about: See how to get help before opening an issue.
+  - name: Problem with the rayohx command line
+    url: https://github.com/coldsofttech/RayoHX-CLI/issues
+    about: Commands, options and download behaviour belong to the command line repository.

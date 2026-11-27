@@ -1,108 +1,84 @@
-# Packaging
+# Packaging and releasing
 
-How the installers are built. For publishing them, see [releasing](releasing.md).
+How the window (`rayohx-desktop`) and the API it carries are built and released. They are not published to PyPI and there is no installer: a release attaches compiled Windows wheels to a GitHub release. The [RayoHX](https://github.com/coldsofttech/RayoHX) library they depend on is released to PyPI from its own repository, and the command line from [RayoHX-CLI](https://github.com/coldsofttech/RayoHX-CLI).
 
 ## What is built
 
-| Product | Contents | Windows | Linux |
-| --- | --- | --- | --- |
-| CLI | `rayohx-cli` | `rayohx-cli-<version>.setup.exe`, and a portable `…-windows-x64.zip` | `.deb` and `.rpm` |
-| UI | `rayohx-desktop` (window) | `rayohx-<version>.setup.exe` | none (the window needs Windows) |
+| What | Where it comes from | Built with |
+| --- | --- | --- |
+| `rayohx_desktop-<version>-<tag>.whl` | the window, with the built front end inside | `PYD_BUILD=1 uv build --wheel --package rayohx-desktop` |
+| `rayohx_api-<version>-<tag>.whl` | the API the window mounts | `PYD_BUILD=1 uv build --wheel --package rayohx-api` |
 
-macOS gets no installer. Install the PyPI package, or use Homebrew once it is switched on.
+Both wheels are compiled with Nuitka into one binary each (`rayohx_desktop.<tag>.pyd` on Windows), with `.pyi` stubs beside it and no `.py` sources. The window wheel carries the built front end (`ui/dist`) as `rayohx_desktop/assets`. The `rayohx` library comes from PyPI. No sdist is published, and the release holds Windows wheels only, for Python 3.15 (`[tool.cibuildwheel] build = "cp315-*"` in each package).
 
 ## The pieces
 
-```text
-installer/pyinstaller/       cli.spec, ui.spec, common.py   freeze the programs (both OSs; ui.spec is Windows only)
-installer/projectinfo.py       names, version and title read from pyproject.toml and the code
-installer/windows/nsis/      cli.nsi, ui.nsi, common.nsh, path.ps1   Windows setup.exe files
-installer/linux/             nfpm.yaml   .deb and .rpm
-installer/tools.toml         pinned versions of NSIS and nfpm
-scripts/build_installer.py   runs the steps above
-scripts/update_manifests.py  release notes and the Homebrew and Scoop manifests
-```
-
-Names, version, icon and description are never repeated: executable names are the `[project.scripts]` keys, the version is `__version__`, the title is `TITLE` in `rayohx_desktop/app.py`, the icon and setup art are in `brand/`, and the rest comes from `[project]`. Each of these is defined once and read by the installer files through `installer/projectinfo.py`, which takes the command and window names from `[project.scripts]` and `[tool.installer]` in `pyproject.toml`. Renaming the project (the Init workflow does it) therefore needs no edit in the installer files.
+- The Python package `rayohx_desktop`, with the `rayohxd` command (`[project.gui-scripts]`), and `rayohx_api`, with the `rayohx-api` command.
+- The version of each package is `__version__` in its `__init__.py`; setuptools reads it from there. `setup.py` compiles the package with Nuitka (it needs a C compiler, MSVC) when `PYD_BUILD=1`, and builds plain Python otherwise, so local development is unaffected.
+- The built front end (`rayohx_desktop/ui/dist`), copied into the wheel by `setup.py`. Build it first with `npm ci && npm run build` in `packages/desktop/src/rayohx_desktop/ui`; a wheel built without it has no front end, and CI checks that the release wheel has one.
+- `python -m rayohx_desktop` and `python -m rayohx_api` work from a source checkout but not from the compiled wheels; use the `rayohxd` and `rayohx-api` commands.
 
 ## Building locally
 
 ```bash
-uv sync --group installer
-uv run python scripts/build_installer.py            # everything this OS can build
-uv run python scripts/build_installer.py cli        # only the command line
-uv run python scripts/build_installer.py ui --build-frontend --smoke
-uv run python scripts/build_installer.py --sync     # install the needed dependency groups first
+npm ci --prefix packages/desktop/src/rayohx_desktop/ui
+npm run build --prefix packages/desktop/src/rayohx_desktop/ui
+PYD_BUILD=1 uv build --wheel --package rayohx-api
+PYD_BUILD=1 uv build --wheel --package rayohx-desktop   # dist/rayohx_desktop-<version>-<tag>.whl
+uvx twine check --strict dist/*
 ```
 
-`--sync` runs `uv sync --inexact` for the `installer` group, plus `ui` and `api` when the window is built, so nothing already installed is removed.
+## Checking a build
 
-Results are in `dist/installer/`; the PyInstaller folders are in `build/installer/`. `--smoke` starts each built program and checks it answers. Independent steps (the CLI and UI PyInstaller builds, then the setups and zip, or the deb and rpm) run side by side on as many threads as there are CPUs; `--jobs 1` runs them one after the other, which keeps the log in order when you are chasing a failure.
+- The [smoke test](../scripts/smoke/README.md) builds both wheels in a fresh environment and runs them. It is a manual check on your own machine.
+- The `build` job in `ci.yml` builds both compiled wheels on every change, checks their metadata, that each holds a binary and its stub but no sources, and that the window wheel carries the front end, so a release never meets a problem for the first time.
 
-| You need | For |
-| --- | --- |
-| `uv sync --group installer` | PyInstaller and the build backend |
-| Node (see `.nvmrc`) | the frontend, for the UI (`--build-frontend` runs `npm ci` and `npm run build`) |
-| NSIS (version in `installer/tools.toml`) | Windows setups; `makensis` on `PATH` or in `Program Files (x86)\NSIS` |
-| nfpm (version in `installer/tools.toml`) | Linux packages; set `NFPM` to run it another way, for example `NFPM="uvx nfpm"` |
+## Installing a release
 
-## PyInstaller
+```sh
+pip install rayohx_api-*.whl rayohx_desktop-*.whl
+rayohxd
+```
 
-Both specs make one-folder builds (no one-file build), each with its own executable and `lib/`.
+The window uses the Microsoft Edge WebView2 runtime, already part of Windows 10 and 11. `cornea doctor` checks for it.
 
-- `cli.spec` builds `rayohx-cli` alone, on any OS, with none of the window's libraries (about 37 MB).
-- `ui.spec` (Windows only) builds `rayohx-cli` and `rayohx-desktop` side by side (about 69 MB). The window has no console, and the built frontend is frozen into `lib/`.
-- `common.py` holds what they share. The entry scripts are generated from the `[project.scripts]` targets.
+## Releasing
 
-The Windows executables carry the icon and file properties (name, version, description), also taken from the project.
+Publishing a GitHub release runs `release.yml`. This repository releases one thing, the compiled wheels of `rayohx-desktop` and `rayohx-api`, so the only tag is `v<version>`.
 
-## Brand files
-
-The executables and the setup use the artwork in `brand/`. The files shipped are placeholders; replace them with your own, keeping the sizes.
-
-| File | Used for | Size |
+| Tag | Releases | Environment |
 | --- | --- | --- |
-| `brand/light/*.ico` | executables, setup and uninstaller icon | 16 to 256 px |
-| `brand/dark/nsis/header.bmp` | setup header (optional) | 150x57 |
-| `brand/dark/nsis/welcome.bmp` | setup welcome and finish pages (optional) | 164x314 |
+| `v<version>` | the compiled Windows wheels of `rayohx-desktop` and `rayohx-api`, with `SHA256SUMS.txt`, attached to the GitHub release | `desktop` |
 
-The bitmaps must be 24-bit BMP. When a bitmap is missing, NSIS uses its default artwork.
+The version is `__version__` in `packages/desktop/src/rayohx_desktop/__init__.py`, and the tag must equal it, for example `v0.2.0` for `__version__ = "0.2.0"`. Keep `rayohx-api` on the same version when you release them together.
 
-## Windows setup (NSIS)
+### Making a release
 
-`common.nsh` holds the behavior and `cli.nsi` and `ui.nsi` set what differs. Settings arrive as `/D` flags from `build_installer.py`.
+1. Release the library first if the packages need a newer one: both depend on the `rayohx` package on PyPI, so that version must already be there.
+2. Bump `__version__` in both packages, and move the `[Unreleased]` entries of `CHANGELOG.md` under a `## [x.y.z]` heading. Merge that pull request.
+3. Publish a GitHub release tagged `v<version>`. Mark it as a pre-release if it should not be offered as the newest.
+4. `release.yml` does the rest:
 
-- **Who it is for:** the default is a per-user install (`%LOCALAPPDATA%\Programs`). The mode page offers all users (`Program Files`), which asks for administrator rights. An administrator sees one prompt at start.
-- **Install folder:** `<publisher>\<app title>\CLI` for the command line and `<publisher>\<app title>\UI` for the window (`PUBLISHER`, `FOLDER_NAME` and `INSTALL_SUBDIR`), so uninstalling one never deletes files the other needs. Uninstalling also removes the app title and publisher folders once they are empty, unless the folder was chosen by hand (the folder page or `/D=`).
-- **License:** a license page shows the `LICENSE` file when it is passed in.
-- **Start Menu:** both products share one `Programs\<app title>` folder (`FOLDER_NAME`, default `APP_NAME`), each with one shortcut named after it and no uninstall shortcut (both are listed in Settings > Apps). The CLI's shortcut opens a prompt where `rayohx-cli` works. Uninstalling removes only its own shortcut, and the folder once it is empty. The UI setup also offers a desktop shortcut.
-- **PATH (CLI only):** a component, on by default, edits the registry through `path.ps1` and is removed again on uninstall. The UI setup never touches PATH.
-- **Uninstall:** removes only what setup installed, so a folder chosen by hand keeps anything else in it. Settings and data stay unless the user opts in.
-- **Upgrades:** a newer setup with the same GUID replaces the old install and clears the old `lib/` first.
+| Job | Result |
+| --- | --- |
+| `check` | the tag must start with `v` and be `v` plus the window's version, or the release stops here |
+| `frontend` | builds the React front end (`npm run build`) and keeps `ui/dist` for the wheels |
+| `build` | compiled wheels of the API and of the window on Windows (a Nuitka `.pyd` each, with stubs and no `.py` sources), for Python 3.15, built with cibuildwheel; the window wheels carry the front end |
+| `attach` | waits for a reviewer of the `desktop` environment (Settings > Environments), then attaches the wheels and `SHA256SUMS.txt` to the release |
 
-Silent use, for scripts and for winget:
+Every wheel is built, and tested by cibuildwheel, before the approval, so the reviewer approves a release that already works. Attaching uses the workflow's own `GITHUB_TOKEN` with `contents: write`, so no secret is stored. Release notes are written on the GitHub release by hand (or with its "Generate release notes" button); `.github/release.yml` groups the generated ones into features, bug fixes and other changes.
 
-```text
-rayohx-cli-<version>.setup.exe /S [/allusers | /currentuser] [/NOPATH] [/D=C:\folder]
-rayohx-<version>.setup.exe     /S [/allusers | /currentuser] [/DESKTOP] [/D=C:\folder]
-uninstall.exe /S [/PURGE]
-```
+To check a release: download the wheels, run `sha256sum --check SHA256SUMS.txt`, then install them in a clean environment as above and start `rayohxd`.
 
-`/D=` must come last. `/PURGE` also removes the data folder, if one is configured (`USER_DATA_DIR`; none is set by default, because the data location depends on your app).
+### Before the first release
 
-Each product has a GUID in its `.nsi` file. It identifies the product for upgrades, so keep it for the life of the project. Init generates new ones for you; to make one by hand, use `python -c "import uuid; print(uuid.uuid4())"`.
+- Create the `desktop` environment (Settings > Environments) and add the people who must approve a release as required reviewers.
+- Release the `rayohx` library to PyPI, so the wheels can install.
+- Check that `__version__` in both packages and the heading in `CHANGELOG.md` match the tag you are about to publish.
 
-## Linux packages (nfpm)
+### If a release fails
 
-One package, the command line. `nfpm.yaml` installs the folder under `/usr/lib/<name>/`, links the command into `/usr/bin`, and ships the license in `/usr/share/doc/<name>/`. Packages are system-wide and need root; removing one deletes only its own files and never touches a user's home. `build_installer.py` sets file modes (folders 755, files 644, executables 755) before packaging.
-
-## WebView2
-
-The window uses the Microsoft Edge WebView2 runtime, which is already part of Windows 10 and 11. The installers do not add it. On an older machine the runtime can be downloaded from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/), and `cornea doctor` checks for it.
-
-## Checks
-
-- `tests/cli/integration/test_frozen_cli.py` and `tests/ui/integration/test_frozen_ui.py` start the built programs (the window without a window) and check they answer.
-- `build.yml` runs on pull requests that touch the installers. It builds on Windows and Linux, installs each package, runs the program and uninstalls it. It is not part of the required `ci` check.
-
-Windows may refuse to start a freshly built, unsigned program (Smart App Control or application control returns error 4551). The smoke tests skip in that case. Signing removes the problem (see [releasing](releasing.md)).
+- **The tag check fails:** the tag does not equal the window's `__version__`. Fix the version, merge, and publish a new release with the right tag.
+- **A wheel build fails:** reproduce with the [smoke test](../scripts/smoke/README.md) on Windows, fix it in a pull request, and publish a new release. Nuitka supports Python 3.15 only experimentally, so watch that wheel in the matrix.
+- **The front end is missing from the window wheel:** the `frontend` job did not upload `ui-dist`, or the download step failed. The `build` job in `ci.yml` checks this on every change, so fix it there first.
+- **Files are already attached:** a re-run replaces them (`--clobber`), so you can re-run the `attach` job after a fix on the same tag.

@@ -1,127 +1,66 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+# Workspace root: not published itself. The distributions live in packages/ (api -> rayohx-api,
+# desktop -> rayohx-desktop). Both need the rayohx library from PyPI.
+[tool.uv.workspace]
+members = ["packages/api", "packages/desktop"]
 
-[project]
-name = "RayoHX-Desktop"
-dynamic = ["version"]
-description = "Python tool with a command line, an HTTP API and a native Windows UI."
-keywords = ["cli", "api", "ui"]
-readme = "README.md"
-requires-python = ">=3.11"
-license = "MIT"
-license-files = ["LICENSE"]
-authors = [{ name = "coldsofttech" }]
-classifiers = [
-  "Environment :: Console",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: 3.14",
-  "Programming Language :: Python :: 3.15",
-  "Topic :: Utilities",
-  "Typing :: Typed",
-]
-# What the published package (core library and command line) needs. The API and the window are not
-# published to PyPI (the installers and the source tree carry them), so their libraries are
-# dependency groups below.
-dependencies = [
-  "rich>=13.9",
-  "typer>=0.15",
-]
-
-[project.scripts]
-rayohx-cli = "rayohx_cli.cli:run"
-
-[project.urls]
-Homepage = "https://github.com/coldsofttech/RayoHX-Desktop"
-Issues = "https://github.com/coldsofttech/RayoHX-Desktop/issues"
-Changelog = "https://github.com/coldsofttech/RayoHX-Desktop/blob/main/CHANGELOG.md"
+[tool.uv.sources]
+rayohx-api = { workspace = true }
+rayohx-desktop = { workspace = true }
+# Shared test plugin from the RayoHX repository; not published to PyPI.
+rayohx-pytest = { git = "https://github.com/coldsofttech/RayoHX", subdirectory = "packages/pytest", tag = "pytest-v0.1.0" }
 
 [dependency-groups]
-# The HTTP API (src/rayohx_api): run on its own with `python -m rayohx_api`, and mounted by the window.
-api = [
-  "fastapi>=0.162.0",
-  "pydantic-settings>=2.16.2",
-  "uvicorn>=0.54.0",
-]
-# The Windows window (src/rayohx_desktop).
-ui = [
-  "cornea-shell>=0.1.1 ; sys_platform == 'win32'",
-]
 dev = [
-  { include-group = "api" },
-  { include-group = "ui" },
+  "rayohx>=0.1.1",
+  "rayohx-api",
+  "rayohx-desktop",
+  "rayohx-pytest",
   "cornea-shell[proxy]>=0.1.1",
-  "httpx>=0.28.1",
+  "httpx2>=2.16.2",
   "mypy>=1.13",
   "pre-commit>=4.0",
   "pytest>=8.3",
   "pytest-cov>=6.0",
   "pytest-xdist>=3.6",
-  "ruff>=0.8",
-  "schemathesis>=4.32.7",
-]
-installer = [
-    "hatchling>=1.33.0",
-    "pyinstaller>=6.22.3",
-]
-
-# Read by installer/projectinfo.py, so the installer scripts and the workflows need no names of
-# their own. cli is the [project.scripts] key of the command line. The window is not published, so
-# it has no script: ui is its executable name and ui-target the function it runs. api is the API
-# package. publisher is optional (the first author when omitted): the name shown in Add/Remove
-# Programs and the file properties.
-[tool.installer]
-publisher = "RayoHX"
-cli = "rayohx-cli"
-ui = "rayohx-desktop"
-ui-target = "rayohx_desktop.__main__:main"
-api = "rayohx_api"
-
-[tool.hatch.version]
-path = "src/rayohx_package/__init__.py"
-
-# `uv build` publishes the core library and the command line only. The API and the window ship in
-# the Windows installers instead. The wheel is built from the sdist, so both
-# list the same two packages.
-[tool.hatch.build.targets.sdist]
-include = [
-  "src/rayohx_package",
-  "src/rayohx_cli",
-  "/README.md",
-  "/LICENSE",
-  "/CHANGELOG.md",
-]
-
-[tool.hatch.build.targets.wheel]
-packages = [
-  "src/rayohx_package",
-  "src/rayohx_cli",
+  "ruff>=0.17.4",
+  "schemathesis>=4.33.2",
+  "types-setuptools>=84.2.0.20261122",
+  "pip-licenses>=5.5.5",
 ]
 
 [tool.ruff]
 line-length = 100
-src = ["src", "tests"]
+src = [
+  "packages/api/src",
+  "packages/desktop/src",
+  "packages/api/tests",
+  "packages/desktop/tests",
+]
 target-version = "py311"
 
 [tool.ruff.lint]
 select = ["B", "C4", "E", "F", "I", "PT", "RUF", "S", "SIM", "T20", "UP", "W"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S603"]  # assert and subprocess are fine in tests
-"scripts/**" = ["S603", "S607", "T201"]  # scripts call the trusted gh CLI and print progress
+"packages/*/tests/**" = ["S101", "S105", "S106", "S603"]  # assert, subprocess and fake passwords are fine in tests
+"packages/api/scripts/**" = ["T201"]  # scripts print what they did
+"scripts/**" = ["S603", "T201"]  # scripts run trusted commands and print progress
 
 [tool.mypy]
 strict = true
 explicit_package_bases = true
-mypy_path = "src"
-files = ["src", "tests"]
+mypy_path = "packages/api:packages/api/src:packages/desktop/src"
+files = ["packages"]
+exclude = ["/build/"]
+
+[tool.pyright]
+extraPaths = [
+  "packages/api/src",
+  "packages/desktop/src",
+]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "-m 'not integration' --strict-markers --cov=rayohx_package --cov=rayohx_cli --cov=rayohx_api --cov=rayohx_desktop --cov-report=term-missing --cov-fail-under=80"
+addopts = "-m 'not integration' --strict-markers --cov=rayohx_api --cov=rayohx_desktop --cov-report=term-missing --cov-fail-under=80"
 markers = ["integration: slower end-to-end tests, run in CI but not by default or in pre-commit"]
 
 [tool.coverage.run]

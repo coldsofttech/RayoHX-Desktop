@@ -2,6 +2,13 @@
 
 <!-- Briefly describe the change and why it is needed. -->
 
+## Which part is affected?
+
+- [ ] API (`packages/api`)
+- [ ] Desktop window (`packages/desktop`, Python)
+- [ ] Front end (`packages/desktop/src/rayohx_desktop/ui`)
+- [ ] Repository, workflows or docs (everything outside `packages/`)
+
 ## Related issues
 
 <!-- e.g. Closes #123 -->
@@ -13,4 +20,5 @@
 - [ ] README or docs are updated if behavior changed
 - [ ] No secrets or personal data are included
 - [ ] API changes: `docs/openapi.json` is regenerated and `docs/api.md` is updated
-- [ ] UI changes: `npm run lint`, `npm test` and `npm run build` pass in `src/rayohx_desktop/ui`
+- [ ] UI changes: `npm run lint`, `npm test` and `npm run build` pass in `packages/desktop/src/rayohx_desktop/ui`
+- [ ] Workflow changes: `actionlint` passes

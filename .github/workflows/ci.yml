@@ -1,5 +1,8 @@
 name: CI
 
+# Lint, tests, integration tests and builds for the API (packages/api) and the desktop window
+# (packages/desktop), with its npm front end. Both are for Windows only, so every job runs on
+# Windows. The `ci` job at the end is the single required check.
 on:
   pull_request:
   push:
@@ -12,183 +15,202 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
+env:
+  UI_DIR: packages/desktop/src/rayohx_desktop/ui
+
 jobs:
   lint:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    name: lint
+    runs-on: windows-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - name: Read project names
-        shell: bash
-        run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: astral-sh/setup-uv@v10.3.3
-      - uses: actions/setup-node@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Set up uv
+        uses: ./.github/actions/setup-uv
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
         with:
           node-version-file: ${{ env.UI_DIR }}/.nvmrc
           cache: npm
           cache-dependency-path: ${{ env.UI_DIR }}/package-lock.json
-      - run: uv sync --locked
-      - run: npm ci --prefix "$UI_DIR"
-      - name: Check the generated CLI reference is up to date
-        run: |
-          uv run typer "$CLI_MODULE" utils docs --name "$CLI_NAME" --output docs/cli-reference.md
-          git diff --exit-code docs/cli-reference.md
+      - name: Install the front end dependencies
+        run: npm ci --prefix "$UI_DIR"
+      - name: Ruff check
+        run: uv run ruff check .
+      - name: Ruff format
+        run: uv run ruff format --check .
+      - name: Mypy
+        run: uv run mypy
       - name: Check the OpenAPI document is up to date
         run: |
-          uv run python scripts/export_openapi.py
+          uv run python packages/api/scripts/export_openapi.py
           git diff --exit-code docs/openapi.json
-      - uses: pre-commit/action@v3.0.1
+      - name: Run the pre-commit hooks
+        uses: pre-commit/action@v3.0.1
         env:
-          SKIP: pytest # covered by the test job across all Python versions
+          SKIP: pytest # covered by the test jobs
+      - name: Check dependency licenses
+        run: uv run pip-licenses --from=mixed --partial-match --fail-on="GPL" --format=plain
 
-  ui:
-    name: ui (node ${{ matrix.node-version }})
-    runs-on: ubuntu-latest
+  lint-npm:
+    name: lint-npm
+    runs-on: windows-latest
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: ["22", "24"]
     steps:
-      - uses: actions/checkout@v7
-      - name: Read project names
-        shell: bash
-        run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: actions/setup-node@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Lint and check formatting
+        uses: ./.github/actions/run-ui-npm
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
-          cache-dependency-path: ${{ env.UI_DIR }}/package-lock.json
-      - run: npm ci
-        working-directory: ${{ env.UI_DIR }}
-      - run: npm run lint
-        working-directory: ${{ env.UI_DIR }}
-      - run: npm run format:check
-        working-directory: ${{ env.UI_DIR }}
-      - run: npm test
-        working-directory: ${{ env.UI_DIR }}
-      - run: npm run build
-        working-directory: ${{ env.UI_DIR }}
-      - uses: actions/upload-artifact@v7
-        if: matrix.node-version == '24'
-        with:
-          name: ui-dist
-          path: ${{ env.UI_DIR }}/dist/
-          if-no-files-found: error
+          node-version: "26"
+          command: npm run lint && npm run format:check
 
   test:
-    name: test (${{ matrix.os }}, ${{ matrix.python-version }})
-    runs-on: ${{ matrix.os }}
+    name: test (${{ matrix.package }})
+    runs-on: windows-latest
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
-        include:
-          - os: windows-latest
-            python-version: "3.11"
-          - os: macos-latest
-            python-version: "3.11"
+        package: [api, desktop]
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Set up uv
+        uses: ./.github/actions/setup-uv
         with:
-          python-version: ${{ matrix.python-version }}
-      - run: uv sync --locked
-      - run: uv run pytest
+          python-version: "3.15"
+          sync-args: --locked --package rayohx-${{ matrix.package }}
+      - name: Run the unit tests
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: uv run --no-sync pytest "packages/$PACKAGE/tests" --no-cov
 
-  integration:
-    name: integration (${{ matrix.os }}, ${{ matrix.python-version }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
-        include:
-          - os: windows-latest
-            python-version: "3.11"
-          - os: macos-latest
-            python-version: "3.11"
+  test-npm:
+    name: test-npm
+    runs-on: windows-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Run the front end tests
+        uses: ./.github/actions/run-ui-npm
         with:
-          python-version: ${{ matrix.python-version }}
-      - run: uv sync --locked
-      # One step per component (tests/<component>/integration), so a failure names its area. The
-      # UI's integration test needs the built frontend and Windows, so the ui-windows job runs it.
-      - name: Integration tests (core)
-        run: uv run pytest -m integration tests/core --no-cov
-      - name: Integration tests (cli)
-        if: ${{ !cancelled() }}
-        run: uv run pytest -m integration tests/cli --no-cov
-      - name: Integration tests (api)
-        if: ${{ !cancelled() }}
-        run: uv run pytest -m integration tests/api --no-cov
+          node-version: "26"
+          command: npm test
 
-  # The UI Python tests need the built frontend and Windows, where Cornea Shell runs.
-  ui-windows:
-    needs: ui
+  build-npm:
+    name: build-npm
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Build the front end
+        uses: ./.github/actions/run-ui-npm
+        with:
+          node-version: "26"
+          command: npm run build
+          upload-dist: "true"
+
+  int-test-api:
+    name: int-test (api)
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - name: Read project names
-        shell: bash
-        run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: astral-sh/setup-uv@v10.3.3
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Set up uv
+        uses: ./.github/actions/setup-uv
         with:
-          python-version: "3.11"
-      - uses: actions/download-artifact@v8
+          python-version: "3.15"
+          sync-args: --locked --package rayohx-api
+      - name: Run the API integration tests
+        run: uv run --no-sync pytest -m integration packages/api/tests --no-cov
+
+  # The window needs the built front end.
+  int-test-desktop:
+    name: int-test (desktop)
+    needs: [build-npm]
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Set up uv
+        uses: ./.github/actions/setup-uv
+        with:
+          python-version: "3.15"
+      - name: Download the front end build
+        uses: actions/download-artifact@v8
         with:
           name: ui-dist
           path: ${{ env.UI_DIR }}/dist/
-      - run: uv sync --locked
-      - run: uv run pytest -m integration tests/ui/integration/test_ui_window.py --no-cov
+      - name: Run the window integration tests
+        run: uv run pytest -m integration packages/desktop/tests --no-cov
 
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    name: build (compiled wheels)
+    needs: [build-npm]
+    runs-on: windows-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
-      - name: Read project names
-        shell: bash
-        run: python3 installer/projectinfo.py github || python installer/projectinfo.py github
-      - uses: astral-sh/setup-uv@v10.3.3
-      - run: uv build
-      - run: uvx twine check --strict dist/*
-      - name: Check the package holds the core library and command line only
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Set up uv
+        uses: ./.github/actions/setup-uv
+        with:
+          sync: "false"
+      - name: Download the front end build
+        uses: actions/download-artifact@v8
+        with:
+          name: ui-dist
+          path: ${{ env.UI_DIR }}/dist/
+      - name: Build the compiled wheels
+        env:
+          PYD_BUILD: "1"
         run: |
-          unzip -l dist/*.whl > wheel.txt
-          grep -q " ${CORE_PACKAGE}/" wheel.txt
-          grep -q " ${CLI_PACKAGE}/" wheel.txt
-          if grep -E " (${API_PACKAGE}|${UI_PACKAGE})/" wheel.txt; then
-            echo "the wheel must not contain the API or the window"; exit 1
-          fi
-      - name: Smoke test the built wheel
-        run: uvx --from dist/*.whl "$CLI_NAME" --version
+          uv build --wheel --package rayohx-api
+          uv build --wheel --package rayohx-desktop
+      - name: Check the package metadata
+        run: uvx twine check --strict dist/*
+      - name: Check the wheels hold binaries and stubs, not sources
+        run: |
+          python - <<'PY'
+          import glob
+          import re
+          import zipfile
+
+          for package in ("rayohx_api", "rayohx_desktop"):
+              (wheel,) = glob.glob(f"dist/{package}-*.whl")
+              names = zipfile.ZipFile(wheel).namelist()
+              assert any(re.fullmatch(rf"{package}\..*\.(so|pyd)", n) for n in names), f"{package}: no binary"
+              assert f"{package}/__init__.pyi" in names, f"{package}: no stubs"
+              sources = [n for n in names if n.startswith(package) and n.endswith(".py")]
+              assert not sources, f"{package}: the compiled wheel must not hold .py sources: {sources}"
+              if package == "rayohx_desktop":
+                  assert "rayohx_desktop/assets/index.html" in names, "the window wheel has no front end"
+          print("wheels ok")
+          PY
+      - name: Smoke test the built wheels
+        run: uvx --from dist/rayohx_desktop-*.whl --with dist/rayohx_api-*.whl rayohxd --version
 
   # Single required status check for the branch ruleset.
   ci:
+    name: ci (required check)
     if: always()
-    needs: [lint, ui, test, integration, ui-windows, build]
+    needs: [lint, lint-npm, test, test-npm, build-npm, int-test-api, int-test-desktop, build]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Check results
+        env:
+          NEEDS: ${{ toJSON(needs) }}
         run: |
-          echo "lint:        ${{ needs.lint.result }}"
-          echo "ui:          ${{ needs.ui.result }}"
-          echo "test:        ${{ needs.test.result }}"
-          echo "integration: ${{ needs.integration.result }}"
-          echo "ui-windows:  ${{ needs.ui-windows.result }}"
-          echo "build:       ${{ needs.build.result }}"
-          [ "${{ needs.lint.result }}" = success ] &&
-          [ "${{ needs.ui.result }}" = success ] &&
-          [ "${{ needs.test.result }}" = success ] &&
-          [ "${{ needs.integration.result }}" = success ] &&
-          [ "${{ needs.ui-windows.result }}" = success ] &&
-          [ "${{ needs.build.result }}" = success ]
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<< "$NEEDS"
+          jq -e 'all(.[]; .result == "success")' <<< "$NEEDS" > /dev/null

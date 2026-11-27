@@ -1,110 +1,159 @@
 # Architecture
 
-How the pieces of this template fit together. For day-to-day commands, see [development](development.md).
+How the repository fits together, and how each package is put together. The download engine itself is the `rayohx` library, which lives in the [RayoHX](https://github.com/coldsofttech/RayoHX) repository and is installed from PyPI. For working on the code, see [development](development.md).
 
-## Overview
-
-A change moves through three layers of checks before it reaches `main`, and a release moves through one more before it reaches PyPI.
-
-```mermaid
-flowchart LR
-    A[Commit] -->|pre-commit hooks| B[Push branch]
-    B --> C[Pull request]
-    C --> D{CI and security checks}
-    D -->|pass + review| E[Squash merge to main]
-    E --> F[GitHub release]
-    F --> G[Release workflow]
-    G --> H[PyPI]
-```
-
-## Layers
-
-| Layer | What runs | Where |
-| --- | --- | --- |
-| Local | gitleaks, file hygiene, markdownlint, Ruff, `uv lock` check, mypy, Sweepito scan and cleanup | pre-commit hooks |
-| Pull request | `ci` (lint, UI checks, unit and integration tests on Python 3.11 to 3.15 on Ubuntu plus 3.11 on Windows and macOS, Windows UI test, build), dependency review, CodeQL | GitHub Actions |
-| Repository | Branch ruleset, secret scanning with push protection, Dependabot alerts and updates | GitHub settings |
-| Release | Version check, wheel and sdist (core library and command line), trusted publish to PyPI, installers and package-manager updates | `release.yml` |
-
-## Source layout
+## The pieces
 
 ```text
-src/rayohx_package/   typed library: all the logic, never prints or exits
-src/rayohx_cli/       Typer + Rich command line over the library
-src/rayohx_api/       FastAPI app over the library: routers, schemas, errors, settings
-src/rayohx_desktop/        Cornea Shell wiring and the `rayohx-desktop` command
-src/rayohx_desktop/ui/     React + Vite frontend (JavaScript); `dist/` is built, not committed
-installer/               PyInstaller specs, NSIS scripts, nfpm config and pinned tool versions
-scripts/                 repository settings, OpenAPI export, installer build and manifest generation
-tests/<component>/     pytest unit tests with coverage (80% minimum), one folder each for core, cli, api and ui
-tests/<component>/integration/   tests marked `integration`: skipped by default and in pre-commit, run in CI
-pyproject.toml         metadata, dev dependencies and tool configuration
-uv.lock                locked dependency set, checked by CI with --locked
+packages/
+  api/       rayohx-api: the FastAPI app over rayohx (rayohx_api)
+  desktop/   rayohx-desktop: the native window and the React front end (rayohx_desktop)
+scripts/dev/     local.py: switches the rayohx and rayohx-pytest sources between release and a local checkout
+scripts/smoke/   a manual check that builds and runs the compiled wheels
 ```
 
-The version lives in one place, `__version__` in the package, and Hatchling reads it at build time. The release workflow compares it with the release tag.
+The two packages are members of one uv workspace (the root `pyproject.toml`), so `uv sync` installs both, editable, with the dev tools. Each package keeps its own version in `__version__` in its `__init__.py`, which its `pyproject.toml` reads, and the two are released together.
 
-## Library and CLI layers
+## How they depend on each other
 
-```mermaid
-flowchart LR
-    U[User] --> C[rayohx_cli]
-    C -->|calls| L[rayohx_package]
-    C --> O[Rich consoles]
+```text
+rayohx_desktop  ->  rayohx_api  ->  rayohx (PyPI)
 ```
 
-- `rayohx_cli` parses arguments with Typer, calls `rayohx_package`, and writes all output through the shared Rich consoles: data to stdout, messages and errors to stderr.
-- `rayohx_package` holds the logic. It raises exceptions instead of printing or exiting, so other front ends can reuse it.
-- The console script `rayohx-cli` and `python -m rayohx_cli` both enter through `rayohx_cli.cli:app`. Both packages ship in one wheel and share the version in `rayohx_package.__version__`.
+- The window mounts the API's routes inside its own server, so the page it shows calls ordinary `/api/v1/...` routes. The API never imports the window, and runs on its own with `rayohx-api`. Both are for Windows only.
+- The library never imports either of them and never prints or exits; both only validate input, call the library and shape the response.
+- The window layer only wires: it builds the Cornea Shell window, mounts the API and registers a few fixed native actions. Cornea's session gate protects the routes inside the window, so the API's own key check is switched off there and nowhere else.
 
-## UI and API layers
+## Release shape
 
-```mermaid
-flowchart LR
-    W[Window: React] -->|fetch| S[Cornea Shell]
-    S -->|mounts| A[rayohx_api]
-    S -->|actions| U[rayohx_desktop]
-    B[Browser, other client] -->|HTTP| A
-    A -->|calls| L[rayohx_package]
-    U -->|calls| L
+The window and the API are released together as compiled Nuitka wheels (one binary each, with `.pyi` stubs and no `.py` sources) attached to a GitHub release. They are not published to PyPI and there is no installer. See [packaging and releasing](packaging.md#releasing).
+
+## Shared test support
+
+Both packages use the `rayohx-pytest` plugin from the RayoHX repository for local HTTP servers, HLS streams and fixtures. It is a development dependency taken from git. See [testing](testing.md).
+
+## The API
+
+`rayohx_api` is a thin FastAPI layer over the `rayohx` library. A route validates its input, calls the library and shapes the response. Logic stays in `rayohx`, which never imports the API. The only dependencies the API adds are FastAPI (with Starlette), uvicorn and pydantic-settings. For running it and its settings, see the [API guide](api.md); for the protections it applies, see the [security notes](security.md#the-api-on-its-own).
+
+### Modules
+
+```text
+packages/api/src/rayohx_api/
+  __main__.py      python -m rayohx_api: checks the settings, then starts uvicorn
+  main.py          create_app(): builds the app, middleware, handlers and routers
+  config.py        Settings (RAYOHX_API_* variables or .env), AuthMode, get_settings()
+  auth.py          authenticate(): the X-API-Key check, and the replacement used when embedded
+  errors.py        problem-details responses and the exception handlers
+  logs.py          JSON logging and the request ID middleware
+  security.py      security headers and the request size limit
+  build.py         turns a request into engine settings and holds the rules for what a client may ask
+  jobs.py          runs downloads in background threads and keeps their state and engine log, saving them to the store
+  store.py         a small SQLite file that keeps the download list, engine logs and saved defaults between restarts
+  defaults.py      merges saved default options under a request and strips secrets before they are saved
+  schemas/
+    health.py      models for /health and /ready
+    v1/            /api/v1 models, one file per route group (inspect, downloads, settings, clean) and common.py for what they share
+  routers/
+    health.py      /health and /ready, at the root, no authentication
+    v1/            the /api/v1 router: one file per route group, and deps.py for the shared state and helpers
 ```
 
-- `rayohx_api` validates input, calls `rayohx_package` and shapes responses. It runs on its own on any system, or is mounted inside Cornea.
-- `rayohx_desktop` only wires Cornea to the API and the library, and holds the `rayohx-desktop` entry point. It is the one place there that shows output and sets exit codes.
-- `rayohx_package` and `rayohx_api` never import `rayohx_desktop`, and `rayohx_package` never imports `rayohx_api`. The Windows-only dependency (`cornea-shell`) is imported lazily.
+### One app, two ways to run it
 
-## Workflows
+`create_app(embedded=False)` is the only place the app is built. There is no module-level app.
 
-| Workflow | Trigger | Purpose |
+| | Standalone (`python -m rayohx_api`) | Embedded (`create_app(embedded=True)`) |
 | --- | --- | --- |
-| `ci.yml` | Pull request, push to `main` | Runs `lint`, `ui`, `test`, `integration`, `ui-windows` and `build`. A final `ci` job gates on all of them and is the only check the ruleset requires. |
-| `api-compat.yml` | Pull request that changes `docs/openapi.json` | Reports breaking API changes with oasdiff. Not required. |
-| `security.yml` | Pull request, push, weekly | Semgrep, uploaded as code scanning results. Not required. |
-| `dependency-review.yml` | Pull request | Blocks pull requests that add vulnerable dependencies. |
-| `audit.yml` | Weekly, manual, and pull requests that change a lock file | Runs `pip-audit` and `npm audit` on the locked dependencies to catch newly published vulnerabilities. |
-| `build.yml` | Pull request that touches the installers | Builds the Windows setups and Linux packages, installs each, runs it and uninstalls it. Not required. |
-| `release.yml` | GitHub release published | Checks the tag matches the version, builds the wheel (core library and command line), publishes to PyPI, builds and optionally signs the installers, attaches them with checksums to the release, and opens Homebrew, Scoop and winget pull requests when switched on. |
-| `init.yml` | Manual | One-time: replaces the owner and repository name, renames the example packages and commands to your name, regenerates the lock file and generated docs, and opens a pull request. Skipped in the template itself. |
+| Hosted by | uvicorn | The desktop window, behind Cornea's security gate |
+| Authentication | `X-API-Key`, or none if `AUTH_MODE=none` | Already done by Cornea; `authenticate` is replaced by `embedded_principal` |
+| Start-up check | Refuses to start without a key unless auth is off | Skipped |
+| Security headers | Added by the API | Left to Cornea |
 
-CodeQL runs through GitHub's default setup rather than a workflow file.
+### A request, step by step
 
-## Branch governance
+Middleware wraps the routes in this order, outermost first:
 
-The `main` branch is protected by a ruleset. It requires:
+1. **CORS**, only when `RAYOHX_API_CORS_ORIGINS` is set.
+2. **Request ID**: reuses the caller's `X-Request-ID` or creates one, and returns it on the response.
+3. **Security headers**, standalone only.
+4. **Body limit**: rejects a declared body above `RAYOHX_API_MAX_BODY_BYTES` with `413`.
+5. **Route**: dependencies run first (`authenticate` for protected routes), then the handler, which returns a response model.
 
-- a pull request with a code owner review and resolved conversations, squash merge only
-- the `ci` and `dependency-review` checks, with the branch up to date
-- CodeQL results
-- no deletion and no force push
+Any error raised on the way is turned into an `application/problem+json` response by the handlers in `errors.py`: HTTP errors keep their status, validation errors become `422` with the field errors, and anything unexpected becomes a `500` with no details (the exception goes to the log with the request ID).
 
-Repository admins can bypass through a pull request so a solo maintainer is not locked out.
+### Settings
 
-## Release flow
+`Settings` is a pydantic-settings class with the prefix `RAYOHX_API_`. `get_settings()` reads it once per process. `check_auth()` runs at start-up, not on the first request, so a missing key stops the service immediately. Nothing else reads environment variables directly.
 
-1. Bump `__version__` and update `CHANGELOG.md` in a pull request.
-2. After merge, publish a GitHub release tagged `v<version>`.
-3. `release.yml` builds the sdist and wheel (the core library and the command line only; the API and the window ship in the installers) in one job, then a second job in the `pypi` environment publishes them using OpenID Connect. No API token is stored, and only the publish job gets the `id-token` permission.
+### Authentication
 
-## Template lifecycle
+Protected routes depend on `authenticate`, which returns a `Principal` (who called, and how) or raises `401` with `WWW-Authenticate: ApiKey`. Keys are compared in constant time. The probes at the root never require authentication.
 
-GitHub copies files, not settings. A new repo therefore needs these steps: run **Init** with a name and title, which replaces the owner and repository name and renames the example packages and commands ([development](development.md)); replace the icon; and optionally switch on signing and the package-manager channels ([releasing](releasing.md)).
+### Logging
+
+All logs, including uvicorn's, go to stderr as one JSON object per line, with the time, level, logger, message and request ID. The request ID travels in a context variable, so any log line written while handling a request carries it.
+
+### Versioning and the contract
+
+- Probes (`/health`, `/ready`) live at the root.
+- Everything else is mounted under `/api/v1`. A breaking change goes in a new `/api/v2` router.
+- [`openapi.json`](openapi.json) is generated from the app. CI fails when it is out of date and `api-compat.yml` reports breaking changes on pull requests.
+- `/docs`, `/redoc` and `/openapi.json` are served only when `RAYOHX_API_DOCS_ENABLED=true`.
+
+## The desktop window
+
+The desktop window is hosted by [Cornea Shell](https://github.com/coldsofttech/CorneaShell) (`cornea-shell`), on Windows only. `rayohx_desktop` only wires things together. The data comes from `rayohx_api` and the work from `rayohx`, and neither of them may import `rayohx_desktop`. For working on it, see [development](development.md); for how it is built, see [packaging and releasing](packaging.md).
+
+### Modules
+
+```text
+packages/desktop/src/rayohx_desktop/
+  __main__.py   the `rayohxd` command: options, output, exit code
+  app.py        builds the Cornea shell: serves dist, mounts the API, registers actions
+  ui/           React + Vite (JavaScript): src/, index.html, package.json, tests
+  ui/dist/      build output, not committed; carried inside the compiled wheel
+```
+
+`app.py` holds the app id, title and version as constants at the top, and must not hold business logic.
+
+### Static files, dynamic app
+
+Cornea serves the built files in `ui/dist`, but the page is a normal single-page app that talks to Python while it runs:
+
+- **Data:** `fetch('/api/v1/...')` calls the `rayohx_api` routes and gets JSON.
+- **Native actions:** `POST /api/bridge/<action>` runs a Python function registered in `app.py`: `app_info` and `open_downloads`. Cornea also provides file and folder pickers, opening links and platform info.
+- **State:** the page holds only what is on screen. The download list, its logs and the saved default options (including the download folder and theme) are kept by `rayohx_api` and survive a restart.
+
+Cornea hosts the page and the API on one address, behind a start-up token, a host and origin check and strict response headers. See [security](security.md#under-the-desktop-window).
+
+### The front end
+
+Plain JavaScript with JSX, built by Vite. Python is called only through `src/api/`. Cornea's policy forbids inline scripts and styles, so styles live in CSS files. `npm run build` writes `ui/dist`, which the compiled wheel carries as `rayohx_desktop/assets`, so using the wheel needs no Node.
+
+```text
+src/
+  api/          the only place that calls Python: client (fetch), bridge, downloads, settings, inspect, clean
+  components/
+    new/        add a stream: inspect, Quick or Advanced selection, several addresses, playlist text
+      options/  the option fields, drawn from data/options-sections.json
+    downloads/  the live list, each card, and its engine log
+    settings/   defaults, download folder, theme, clean-up, about
+  data/         option sections, qualities, codecs, formats and other lists as JSON
+  format.js     sizes, speeds and durations as short text
+  options.js    reads the option sections and looks up values by field id
+  theme.js      Fluent UI themes
+```
+
+Each folder holds small components with a test beside each one. The option list lives in `data/options-sections.json`; adding an option there adds its field to the form.
+
+**Default options.** Settings saves the default options for new downloads. The form shows them as hints through the `Inherited` context in `components/new/options/inherited.js`, and a download sends only the options the user changed, so everything else follows the saved defaults. Fields marked `defaultsOnly` (such as quality) appear only in Settings and, for quality, in Quick selection.
+
+**Download log.** A card shows a log button when the download reports `has_log`. The log is fetched when opened and lists what the engine reported.
+
+### Window actions
+
+| Action | Result |
+| --- | --- |
+| `app_info` | the app name and version |
+| `open_downloads` | shows the download folder in Explorer; the page names no path |
