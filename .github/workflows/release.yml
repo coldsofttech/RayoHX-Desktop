@@ -2,9 +2,9 @@ name: Release
 
 # Runs when a GitHub release is published with a tag v*. Builds the desktop window
 # (rayohx-desktop, which carries the API routes) and the API (rayohx-api) as compiled Nuitka wheels
-# for Windows, one per Python version, with no sdist and no .py sources, and attaches them to the
-# release, with a portable app (rayohxd.exe and lib/, frozen with PyInstaller) as a zip, a Windows
-# setup (NSIS) for it, and SHA256SUMS.txt. Nothing is published to PyPI.
+# for Windows with no .py sources, freezes them with PyInstaller (rayohxd.exe and lib/) and attaches
+# the portable app as a zip, a Windows setup (NSIS) for it, and SHA256SUMS.txt to the release. The
+# wheels are only build inputs and are not attached. Nothing is published to PyPI.
 #
 # The job that attaches the files waits for a reviewer of the `desktop` environment
 # (Settings > Environments), after everything has been built.
@@ -130,11 +130,6 @@ jobs:
     permissions:
       contents: write # attach the files to the release
     steps:
-      - name: Download the wheels
-        uses: actions/download-artifact@v8
-        with:
-          name: dist
-          path: dist/
       - name: Download the portable app and the setup
         uses: actions/download-artifact@v8
         with:
@@ -142,9 +137,9 @@ jobs:
           path: dist/
       - name: Write the checksums
         working-directory: dist
-        run: sha256sum ./*.whl ./*.zip ./*-setup.exe > SHA256SUMS.txt
+        run: sha256sum ./*.zip ./*-setup.exe > SHA256SUMS.txt
       - name: Attach the files to the release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "$TAG" dist/*.whl dist/*.zip dist/*-setup.exe dist/SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"
+        run: gh release upload "$TAG" dist/*.zip dist/*-setup.exe dist/SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"
