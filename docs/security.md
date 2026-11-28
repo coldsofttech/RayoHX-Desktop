@@ -4,7 +4,7 @@ How the API and the desktop window protect requests and data. To report a vulner
 
 ## The API on its own
 
-When run alone (`python -m rayohx_api`), Cornea is absent, so the API protects itself:
+This applies when the API is run from a checkout (`python -m rayohx_api`), for development, Cornea is absent, so the API protects itself:
 
 - **API key:** protected routes need an `X-API-Key` header matching `RAYOHX_API_API_KEYS`. The app will not start without a key unless `RAYOHX_API_AUTH_MODE=none`, which is for local development only. Keys are compared in constant time and never logged.
 - **Headers:** `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, a restrictive CSP, `Cache-Control: no-store` on `/api/` and HSTS over HTTPS.
@@ -38,8 +38,8 @@ When the desktop window mounts the API routes, Cornea's `SecurityMiddleware` gua
 
 ## What you install
 
-- **Compiled wheels.** The window and the API are released as compiled wheels with no `.py` sources, attached to a GitHub release. There is no installer, so nothing changes `PATH` or the registry.
-- **Check what you download.** Each release carries `SHA256SUMS.txt`: run `sha256sum --check SHA256SUMS.txt` (or `Get-FileHash` on Windows) before installing. The wheels are not signed.
+- **Compiled app.** The window and the API are released as a frozen app of compiled modules with no `.py` sources, as a Windows setup and a portable zip attached to a GitHub release. The Windows setup installs into `ColdSoft Technologies\RayoHX Desktop` (per user by default, all users with administrator rights), adds only its own Start Menu and Apps & features entries, never changes `PATH`, and its uninstaller removes only what it installed. The portable zip changes neither `PATH` nor the registry.
+- **Check what you download.** Each release carries `SHA256SUMS.txt`: run `sha256sum --check SHA256SUMS.txt` (or `Get-FileHash` on Windows) before installing. The setup and the zip are not signed.
 - **Install in an isolated environment.** Use a virtual environment or `pipx`, so the window's dependencies stay apart from your other tools.
 - **Released carefully.** The files are attached only after everything is built and a reviewer approves the `desktop` environment, using the workflow's own token with no stored secret. See [packaging and releasing](packaging.md#releasing).
 

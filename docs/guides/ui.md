@@ -8,18 +8,20 @@ the window only shows your choices and results, and all the work is done by the 
 
 ## Install
 
-The window is installed from two compiled wheels, `rayohx_desktop` and `rayohx_api`, which you download
-from the newest [release](https://github.com/coldsofttech/RayoHX-Desktop/releases) and install together
-with `pip install rayohx_api-*.whl rayohx_desktop-*.whl`. It needs Windows 10 or 11, the Microsoft Edge
-WebView2 runtime (which both already include) and Python 3.15. It is not published on PyPI, and there is no
-installer, so nothing is added to the Start Menu or the desktop.
+The easiest way is the Windows setup, `rayohx-desktop-<version>-windows-x64-setup.exe`, from the newest
+[release](https://github.com/coldsofttech/RayoHX-Desktop/releases). It needs no Python, installs into
+`ColdSoft Technologies\RayoHX Desktop` (for you, or for all users if you choose), adds a Start Menu entry and
+optionally a desktop shortcut, and can be removed from Windows Settings > Apps.
+
+If you prefer not to install anything, download the portable zip, `rayohx-desktop-<version>-windows-x64.zip`,
+from the same release, extract it anywhere and run `rayohxd\rayohxd.exe`. Either way you need Windows 10 or 11 and
+the Microsoft Edge WebView2 runtime, which both already include.
 
 Each release lists SHA-256 checksums in `SHA256SUMS.txt`. Check your download with
-`sha256sum --check SHA256SUMS.txt` before installing, and install into a virtual environment or with `pipx`
-so the window's dependencies stay apart from your other tools.
+`sha256sum --check SHA256SUMS.txt` before installing or extracting it.
 
-To upgrade, download the wheels of the newer release and run the same `pip install` command again with
-`--upgrade`. Your saved defaults, download list and logs stay, because they are kept outside the install.
+To upgrade, run the newer setup over the old one, or extract the newer zip to a fresh folder. Your saved
+defaults, download list and logs stay, because they are kept outside the install.
 
 ## Open the window
 
@@ -54,8 +56,8 @@ shows addresses, errors and logs as plain text. The protections that exist today
 - **The window does not open.** The window needs the Microsoft Edge WebView2 runtime. Run
   `cornea doctor` to check for it, or start `rayohxd --no-window` and open the address it prints in a
   browser to see whether the interface itself works.
-- **The wheel will not install.** The wheels are built for Windows and Python 3.15 only. Install
-  `rayohx_api` and `rayohx_desktop` together from the same release, as in [Install](#install).
+- **The setup or the zip will not run.** They are built for 64-bit Windows 10 or 11 only. Download them
+  from the release and check them against `SHA256SUMS.txt`, as in [Install](#install).
 - **A download failed.** Open its log from the card on the [Downloads](ui/downloads.md) page to see what
   the engine reported, and retry it from there.
 - **Window logs.** The window's own log is kept in `%LOCALAPPDATA%\Cornea\logs\cornea.log`.

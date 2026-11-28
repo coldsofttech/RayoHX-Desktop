@@ -1,15 +1,15 @@
 # API
 
-`rayohx_api` is a FastAPI app over `rayohx`. It runs on its own on Windows, and the same routes are mounted inside the UI window (see the [desktop window architecture](architecture.md#the-desktop-window)). Routes only validate input, call the library and shape the response; logic stays in `rayohx`. For how the pieces fit together, see [architecture](architecture.md#the-api); to work on the API, see [development](development.md).
+`rayohx_api` is a FastAPI app over `rayohx`. It is the internal layer of RayoHX Desktop and is not shipped as a separate program: the same routes are mounted inside the UI window (see the [desktop window architecture](architecture.md#the-desktop-window)). Routes only validate input, call the library and shape the response; logic stays in `rayohx`. For how the pieces fit together, see [architecture](architecture.md#the-api); to work on the API, see [development](development.md).
 
-## Running it
+## Running it (development)
 
 ```bash
 cp packages/api/.env.example .env              # set RAYOHX_API_API_KEYS, or RAYOHX_API_AUTH_MODE=none
 uv run python -m rayohx_api                    # http://127.0.0.1:8000
 ```
 
-That is the development form, which runs the plain sources. An installed release is compiled and has no `python -m rayohx_api`; start it with the `rayohx-api` command instead, which takes the same settings.
+This runs the plain sources from a checkout, for working on the API. Releases ship only the desktop app (setup or portable zip), which has no separate API command.
 
 The app refuses to start without an API key unless authentication is switched off. This is on purpose, so the API is never open by accident. See [security](security.md).
 

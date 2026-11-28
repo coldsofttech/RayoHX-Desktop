@@ -26,7 +26,7 @@ rayohx_desktop  ->  rayohx_api  ->  rayohx (PyPI)
 
 ## Release shape
 
-The window and the API are released together as compiled Nuitka wheels (one binary each, with `.pyi` stubs and no `.py` sources) attached to a GitHub release. They are not published to PyPI and there is no installer. See [packaging and releasing](packaging.md#releasing).
+The window and the API are released together as one frozen app (PyInstaller, built from compiled Nuitka modules with no `.py` sources), attached to a GitHub release as a Windows setup (NSIS, built from `installer/windows/`) and a portable zip. They are not published to PyPI. See [packaging and releasing](packaging.md#releasing).
 
 ## Shared test support
 

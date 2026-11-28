@@ -7,8 +7,11 @@ body:
     attributes:
       label: Which part is affected?
       options:
-        - API
         - Desktop window (rayohx-desktop)
+        - API
+        - Windows setup (installer, uninstaller)
+        - Portable zip
+        - Documentation
         - Not Sure
     validations:
       required: true
@@ -28,18 +31,29 @@ body:
         2. ...
     validations:
       required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - Windows setup (.exe)
+        - Portable zip
+        - Built from source
+        - Not Sure
+    validations:
+      required: true
   - type: input
     id: version
     attributes:
       label: Version
-      description: Release or commit you are using.
+      description: Release (for example 0.1.0, shown by `rayohxd.exe --version` or in Settings > Apps) or commit you are using.
   - type: textarea
     id: environment
     attributes:
       label: Environment
-      description: Operating system and version, Python version, and how you installed it. For the desktop window, also say if the Microsoft Edge WebView2 runtime is installed.
+      description: Windows version, and whether the setup was run for one user or all users. For the desktop window, also say if the Microsoft Edge WebView2 runtime is installed. If you built from source, add your Python version.
       placeholder: |
-        Windows 11, Python 3.13, installed with uv tool install
+        Windows 11 23H2, installed for the current user, WebView2 installed
   - type: textarea
     id: logs
     attributes:

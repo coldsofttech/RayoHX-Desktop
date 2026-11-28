@@ -1,0 +1,6 @@
+# Versions of the installer tools that are not Python packages, pinned in one place. The release
+# workflow reads this file.
+# Dependabot does not see these, so check for new releases when you update the rest.
+
+[tools]
+nsis = "3.13" # https://nsis.sourceforge.io/ ; Windows setup builder

@@ -32,7 +32,7 @@ The front end has its own tests (Vitest and Testing Library): `npm test --prefix
 
 ## In CI
 
-The API and the window are for Windows only, so `ci.yml` runs every job on Windows (Python 3.15, Node 26): lint, the unit tests of both packages, the API and window integration tests (the window's with the built front end), and the front end lint, tests and build. It also checks dependency licenses, builds the compiled wheels, checks them and starts the built window with `--version`. A final `ci` job, which runs on Linux, is the single required check.
+The API and the window are for Windows only, so `ci.yml` runs every job on Windows (Python 3.15, Node 26): lint, the unit tests of both packages, the API and window integration tests (the window's with the built front end), and the front end lint, tests and build. It also checks dependency licenses, builds the compiled wheels, checks them, starts the built window with `--version`, then freezes the app, builds the Windows setup and installs and uninstalls it silently. A final `ci` job, which runs on Linux, is the single required check.
 
 ## The `rayohx-pytest` plugin
 

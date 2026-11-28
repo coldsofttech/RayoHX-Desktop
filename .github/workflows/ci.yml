@@ -155,7 +155,7 @@ jobs:
         run: uv run pytest -m integration packages/desktop/tests --no-cov
 
   build:
-    name: build (compiled wheels)
+    name: build (wheels and setup)
     needs: [build-npm]
     runs-on: windows-latest
     timeout-minutes: 30
@@ -199,6 +199,12 @@ jobs:
           PY
       - name: Smoke test the built wheels
         run: uvx --from dist/rayohx_desktop-*.whl --with dist/rayohx_api-*.whl rayohxd --version
+      - name: Install NSIS
+        uses: ./.github/actions/install-nsis
+      - name: Freeze the app and build the setup
+        run: python scripts/build.py --no-build --setup
+      - name: Install and uninstall the setup
+        uses: ./.github/actions/test-setup
 
   # Single required status check for the branch ruleset.
   ci:

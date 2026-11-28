@@ -7,6 +7,7 @@
 - [ ] API (`packages/api`)
 - [ ] Desktop window (`packages/desktop`, Python)
 - [ ] Front end (`packages/desktop/src/rayohx_desktop/ui`)
+- [ ] Windows setup or portable zip (`installer/`, `scripts/build.py`)
 - [ ] Repository, workflows or docs (everything outside `packages/`)
 
 ## Related issues
@@ -21,4 +22,5 @@
 - [ ] No secrets or personal data are included
 - [ ] API changes: `docs/openapi.json` is regenerated and `docs/api.md` is updated
 - [ ] UI changes: `npm run lint`, `npm test` and `npm run build` pass in `packages/desktop/src/rayohx_desktop/ui`
+- [ ] Installer changes: `python scripts/build.py --setup` builds, and the setup installs and uninstalls cleanly
 - [ ] Workflow changes: `actionlint` passes

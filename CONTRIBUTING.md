@@ -25,9 +25,10 @@ Run these from the repository root. Scope them to the package you changed rather
 | The API (`packages/api`) | The Python checks above, then `uv run python packages/api/scripts/export_openapi.py` and commit `docs/openapi.json` |
 | The window (`packages/desktop`) | The Python checks above for `desktop` |
 | The front end (`packages/desktop/src/rayohx_desktop/ui`) | `npm ci`, `npm run lint`, `npm test` and `npm run build` in that folder |
+| The Windows setup (`installer/`, `scripts/build.py`) | `python scripts/build.py --setup` (needs NSIS, Node and a C compiler), then run the setup and uninstall it |
 | A workflow | `actionlint` passes (it runs in pre-commit) |
 
-You need Windows (the API and the window are for Windows only) and Node for front end work. The window's Python tests use a stand-in for the window, so no window opens. The tests use the shared `rayohx-pytest` plugin from the [RayoHX](https://github.com/coldsofttech/RayoHX) repository, which `uv sync` installs from git. See [development](docs/development.md) and [testing](docs/testing.md).
+You need Windows (the API and the window are for Windows only) and Node for front end work, plus NSIS to build the setup. The window's Python tests use a stand-in for the window, so no window opens. The tests use the shared `rayohx-pytest` plugin from the [RayoHX](https://github.com/coldsofttech/RayoHX) repository, which `uv sync` installs from git. See [development](docs/development.md) and [testing](docs/testing.md).
 
 ## Pull request rules
 

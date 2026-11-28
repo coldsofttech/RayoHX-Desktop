@@ -1,15 +1,15 @@
 # Packaging and releasing
 
-How the window (`rayohx-desktop`) and the API it carries are built and released. They are not published to PyPI and there is no installer: a release attaches compiled Windows wheels to a GitHub release. The [RayoHX](https://github.com/coldsofttech/RayoHX) library they depend on is released to PyPI from its own repository, and the command line from [RayoHX-CLI](https://github.com/coldsofttech/RayoHX-CLI).
+How the window (`rayohx-desktop`) and the API it carries are built and released. They are not published to PyPI: a release attaches a Windows setup and a portable zip of the frozen app to a GitHub release. The [RayoHX](https://github.com/coldsofttech/RayoHX) library they depend on is released to PyPI from its own repository, and the command line from [RayoHX-CLI](https://github.com/coldsofttech/RayoHX-CLI).
 
 ## What is built
 
 | What | Where it comes from | Built with |
 | --- | --- | --- |
-| `rayohx_desktop-<version>-<tag>.whl` | the window, with the built front end inside | `PYD_BUILD=1 uv build --wheel --package rayohx-desktop` |
-| `rayohx_api-<version>-<tag>.whl` | the API the window mounts | `PYD_BUILD=1 uv build --wheel --package rayohx-api` |
+| `rayohx-desktop-<version>-windows-x64-setup.exe` | the frozen app, wrapped in an NSIS setup | `python scripts/build.py --setup` |
+| `rayohx-desktop-<version>-windows-x64.zip` | the frozen app (`rayohxd/rayohxd.exe` and `lib/`), portable | `python scripts/build.py` |
 
-Both wheels are compiled with Nuitka into one binary each (`rayohx_desktop.<tag>.pyd` on Windows), with `.pyi` stubs beside it and no `.py` sources. The window wheel carries the built front end (`ui/dist`) as `rayohx_desktop/assets`. The `rayohx` library comes from PyPI. No sdist is published, and the release holds Windows wheels only, for Python 3.15 (`[tool.cibuildwheel] build = "cp315-*"` in each package).
+The app is frozen with PyInstaller from two compiled wheels, `rayohx_desktop` and `rayohx_api`, which are build inputs and not something users install. Each is compiled with Nuitka into one binary (`rayohx_desktop.<tag>.pyd` on Windows), with `.pyi` stubs beside it and no `.py` sources, and the window wheel carries the built front end (`ui/dist`) as `rayohx_desktop/assets`. The `rayohx` library comes from PyPI at build time. No sdist is published, and the build is for Windows and Python 3.15 only (`[tool.cibuildwheel] build = "cp315-*"` in each package).
 
 ## The pieces
 
@@ -28,6 +28,16 @@ PYD_BUILD=1 uv build --wheel --package rayohx-desktop   # dist/rayohx_desktop-<v
 uvx twine check --strict dist/*
 ```
 
+## The Windows setup
+
+`python scripts/build.py --setup` freezes the app, then wraps the frozen folder in an NSIS setup, `dist/rayohx-desktop-<version>-windows-x64-setup.exe`. It needs NSIS (`makensis`); the version CI uses is pinned in `installer/tools.toml`.
+
+- `installer/windows/setup.nsi` holds what is specific to the desktop app; the behavior (pages, per-user or all-users install, silent use, uninstaller) is in `installer/windows/common.nsh`.
+- The `[setup]` table of `installer/build.toml` holds the product GUID, the install folder (`ColdSoft Technologies\RayoHX Desktop`, under Program Files for all users or `%LOCALAPPDATA%\Programs` for one user), the Start Menu folder and the brand files. Never change the GUID after a release: Windows uses it to find the installed app.
+- `build.py` writes the list of installed files for the uninstaller, so it removes only what setup installed. Settings and downloads in `%LOCALAPPDATA%\ColdSoft Technologies\RayoHX` stay unless the user agrees (or `/PURGE` is passed silently).
+- Silent use: `setup.exe /S [/allusers | /currentuser] [/DESKTOP] [/D=C:\folder]` and `uninstall.exe /S [/PURGE]`.
+- The `freeze` job of `release.yml` and the `build` job of `ci.yml` build the setup, then install it silently, run `rayohxd --version`, uninstall it and check nothing is left (`.github/actions/test-setup`). NSIS is installed by `.github/actions/install-nsis`.
+
 ## Checking a build
 
 - The [smoke test](../scripts/smoke/README.md) builds both wheels in a fresh environment and runs them. It is a manual check on your own machine.
@@ -35,20 +45,17 @@ uvx twine check --strict dist/*
 
 ## Installing a release
 
-```sh
-pip install rayohx_api-*.whl rayohx_desktop-*.whl
-rayohxd
-```
+Run `rayohx-desktop-<version>-windows-x64-setup.exe`, or extract `rayohx-desktop-<version>-windows-x64.zip` and run `rayohxd\rayohxd.exe`. Users never install the wheels.
 
 The window uses the Microsoft Edge WebView2 runtime, already part of Windows 10 and 11. `cornea doctor` checks for it.
 
 ## Releasing
 
-Publishing a GitHub release runs `release.yml`. This repository releases one thing, the compiled wheels of `rayohx-desktop` and `rayohx-api`, so the only tag is `v<version>`.
+Publishing a GitHub release runs `release.yml`. This repository releases one thing, the RayoHX Desktop app (which carries the API), so the only tag is `v<version>`.
 
 | Tag | Releases | Environment |
 | --- | --- | --- |
-| `v<version>` | the compiled Windows wheels of `rayohx-desktop` and `rayohx-api`, with `SHA256SUMS.txt`, attached to the GitHub release | `desktop` |
+| `v<version>` | the Windows setup and the portable zip, with `SHA256SUMS.txt`, attached to the GitHub release | `desktop` |
 
 The version is `__version__` in `packages/desktop/src/rayohx_desktop/__init__.py`, and the tag must equal it, for example `v0.2.0` for `__version__ = "0.2.0"`. Keep `rayohx-api` on the same version when you release them together.
 
@@ -62,18 +69,19 @@ The version is `__version__` in `packages/desktop/src/rayohx_desktop/__init__.py
 | Job | Result |
 | --- | --- |
 | `check` | the tag must start with `v` and be `v` plus the window's version, or the release stops here |
-| `frontend` | builds the React front end (`npm run build`) and keeps `ui/dist` for the wheels |
-| `build` | compiled wheels of the API and of the window on Windows (a Nuitka `.pyd` each, with stubs and no `.py` sources), for Python 3.15, built with cibuildwheel; the window wheels carry the front end |
-| `attach` | waits for a reviewer of the `desktop` environment (Settings > Environments), then attaches the wheels and `SHA256SUMS.txt` to the release |
+| `frontend` | builds the React front end (`npm run build`) and keeps `ui/dist` for the build |
+| `build` | compiled wheels of the API and of the window on Windows (a Nuitka `.pyd` each, with stubs and no `.py` sources), for Python 3.15, built with cibuildwheel; the window wheel carries the front end |
+| `freeze` | freezes them with PyInstaller into the portable zip, builds the setup, and installs and uninstalls it silently as a check |
+| `attach` | waits for a reviewer of the `desktop` environment (Settings > Environments), then attaches the setup, the zip and `SHA256SUMS.txt` to the release |
 
-Every wheel is built, and tested by cibuildwheel, before the approval, so the reviewer approves a release that already works. Attaching uses the workflow's own `GITHUB_TOKEN` with `contents: write`, so no secret is stored. Release notes are written on the GitHub release by hand (or with its "Generate release notes" button); `.github/release.yml` groups the generated ones into features, bug fixes and other changes.
+Every wheel is built, and tested by cibuildwheel, and the setup is installed and removed once, before the approval, so the reviewer approves a release that already works. Attaching uses the workflow's own `GITHUB_TOKEN` with `contents: write`, so no secret is stored. Release notes are written on the GitHub release by hand (or with its "Generate release notes" button); `.github/release.yml` groups the generated ones into features, bug fixes and other changes.
 
-To check a release: download the wheels, run `sha256sum --check SHA256SUMS.txt`, then install them in a clean environment as above and start `rayohxd`.
+To check a release: download the setup and the zip, run `sha256sum --check SHA256SUMS.txt`, then install or extract one on a clean machine as above and start the app.
 
 ### Before the first release
 
 - Create the `desktop` environment (Settings > Environments) and add the people who must approve a release as required reviewers.
-- Release the `rayohx` library to PyPI, so the wheels can install.
+- Release the `rayohx` library to PyPI, so the build can install it.
 - Check that `__version__` in both packages and the heading in `CHANGELOG.md` match the tag you are about to publish.
 
 ### If a release fails
