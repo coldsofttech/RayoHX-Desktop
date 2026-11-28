@@ -155,6 +155,7 @@ def main() -> None:
     parser.add_argument("--wheels", type=Path, default=ROOT / "dist", help="folder with the wheels")
     parser.add_argument("--python", default="3.15", help="Python version of the frozen app")
     args = parser.parse_args()
+    args.wheels = args.wheels.resolve()  # makensis resolves a relative output path against the .nsi
     if sys.platform != "win32":
         raise SystemExit("The window is for Windows only.")
     uv = shutil.which("uv")
