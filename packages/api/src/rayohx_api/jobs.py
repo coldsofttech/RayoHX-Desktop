@@ -228,8 +228,11 @@ class JobManager:
         from rayohx.serialization import progress_to_dict
 
         with self._lock:
-            changed = record.state is not event.state
-            record.state = event.state
+            # A terminal state is set by _run together with the output, so a client never sees
+            # "completed" before the output path and size are known.
+            state = record.state if event.state.is_terminal else event.state
+            changed = record.state is not state
+            record.state = state
             record.updated_at = time.time()
             if event.progress is not None:
                 record.progress = progress_to_dict(event.progress)
