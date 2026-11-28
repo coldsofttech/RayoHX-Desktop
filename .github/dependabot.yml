@@ -44,6 +44,7 @@ updates:
       npm:
         patterns: ["*"]
 
+  # The NSIS version (installer/tools.toml) is not seen by Dependabot; check it by hand.
   # The pinned PyInstaller version of the portable app (installer/pyinstaller/requirements.txt).
   - package-ecosystem: pip
     directory: /installer/pyinstaller

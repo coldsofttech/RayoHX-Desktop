@@ -6,7 +6,7 @@ Only the latest release receives security fixes.
 
 ## What is covered
 
-The desktop window and the HTTP API (run on its own or inside the window), and the compiled wheels published with each release. How each protects requests and data is described in [docs/security.md](docs/security.md). Problems in the download engine itself belong to the [RayoHX](https://github.com/coldsofttech/RayoHX) repository, and problems in the command line to [RayoHX-CLI](https://github.com/coldsofttech/RayoHX-CLI).
+The desktop window and the HTTP API inside it, and the Windows setup and portable zip published with each release. How each protects requests and data is described in [docs/security.md](docs/security.md). Problems in the download engine itself belong to the [RayoHX](https://github.com/coldsofttech/RayoHX) repository, and problems in the command line to [RayoHX-CLI](https://github.com/coldsofttech/RayoHX-CLI).
 
 ## Reporting a vulnerability
 

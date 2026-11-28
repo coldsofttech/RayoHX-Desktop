@@ -1,0 +1,11 @@
+name: Install NSIS
+description: Install NSIS on Windows at the version pinned in installer/tools.toml. Run after checkout.
+
+runs:
+  using: composite
+  steps:
+    - name: Install NSIS
+      shell: bash
+      run: |
+        version=$(python -c "import tomllib; print(tomllib.load(open('installer/tools.toml', 'rb'))['tools']['nsis'])")
+        choco install nsis --version "$version" --yes --no-progress

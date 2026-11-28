@@ -62,7 +62,7 @@ npm run lint --prefix packages/desktop/src/rayohx_desktop/ui
 npm test --prefix packages/desktop/src/rayohx_desktop/ui
 ```
 
-The `--no-cov` flag is needed because the coverage threshold in the root `pyproject.toml` applies to both packages, not one. What the tests cover and how to run them are in [testing](testing.md). CI (`ci.yml`) runs the same checks as separate jobs: `lint` (ruff, mypy, the OpenAPI check, pre-commit and the dependency licenses), `lint-npm`, `test` (one per package), `test-npm`, `build-npm`, `int-test` (api and desktop) and `build` (the compiled wheels and a `--version` smoke test), with `ci` as the single check the branch ruleset needs. Other workflows run outside that check: `security.yml` (Semgrep), `audit.yml` (`pip-audit` on the locked dependencies), `dependency-review.yml` and `api-compat.yml` (breaking API changes on a pull request).
+The `--no-cov` flag is needed because the coverage threshold in the root `pyproject.toml` applies to both packages, not one. What the tests cover and how to run them are in [testing](testing.md). CI (`ci.yml`) runs the same checks as separate jobs: `lint` (ruff, mypy, the OpenAPI check, pre-commit and the dependency licenses), `lint-npm`, `test` (one per package), `test-npm`, `build-npm`, `int-test` (api and desktop) and `build` (the compiled wheels, a `--version` smoke test, and the Windows setup installed and uninstalled silently), with `ci` as the single check the branch ruleset needs. Other workflows run outside that check: `security.yml` (Semgrep), `audit.yml` (`pip-audit` on the locked dependencies), `dependency-review.yml` and `api-compat.yml` (breaking API changes on a pull request).
 
 ## Adding an API endpoint
 

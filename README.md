@@ -11,9 +11,8 @@
 
 Download HLS streams from a desktop window on Windows, without the terminal.
 
-```sh
-rayohxd
-```
+[Download the setup or the portable zip](https://github.com/coldsofttech/RayoHX-Desktop/releases),
+then start RayoHX Desktop from the Start Menu (or run `rayohxd.exe` from the zip).
 
 ![The RayoHX window with the Add a stream form](docs/guides/images/quick.png)
 
@@ -51,15 +50,24 @@ Docker image and this **desktop window for Windows**.
 
 ## Install
 
-You need Windows 10 or 11, which already include the Microsoft Edge WebView2 runtime the window uses,
-and Python 3.15 or newer. The window is not published to PyPI and there is no installer: download the
-two compiled wheels, `rayohx_desktop` and `rayohx_api`, from the newest
-[release](https://github.com/coldsofttech/RayoHX-Desktop/releases) and install them together. The
-`rayohx` library comes from PyPI for you.
+### Windows setup
 
-```sh
-pip install rayohx_api-*.whl rayohx_desktop-*.whl
-```
+Download `rayohx-desktop-<version>-windows-x64-setup.exe` from the newest
+[release](https://github.com/coldsofttech/RayoHX-Desktop/releases) and run it. It needs no Python and
+works on Windows 10 or 11, which already include the Microsoft Edge WebView2 runtime the window uses.
+It installs for you only by default, or for all users if you choose that (Windows asks for
+permission). The app goes to `ColdSoft Technologies\RayoHX Desktop`, you can add a desktop shortcut,
+and you start it from the Start Menu. Remove it from Windows Settings > Apps; your settings and
+downloads list are kept unless you choose to remove them.
+
+For a silent install, run `setup.exe /S`, with `/allusers`, `/DESKTOP` or `/D=C:\folder` if you want
+them.
+
+### Portable zip
+
+Download `rayohx-desktop-<version>-windows-x64.zip` from the same release, extract it anywhere and run
+`rayohxd\rayohxd.exe`. Nothing is installed and nothing is changed on your computer; delete the folder
+to remove it.
 
 Each release lists SHA-256 checksums in `SHA256SUMS.txt`, so you can check your download:
 
@@ -70,27 +78,14 @@ sha256sum --check SHA256SUMS.txt
 ## Open the window
 
 ```sh
-rayohxd                 # open the window
-rayohxd --no-window     # serve the interface for a browser instead of a window
-rayohxd --version       # show the installed version
-rayohxd --help
+rayohxd.exe             # open the window
+rayohxd.exe --no-window # serve the interface for a browser instead of a window
+rayohxd.exe --version   # show the installed version
+rayohxd.exe --help
 ```
 
 The [window guide](docs/guides/ui.md) walks through adding a stream, following downloads and the
 settings.
-
-## Use it from your own programs
-
-The HTTP API the window is built on can also run on its own, so scripts and other programs can inspect
-playlists and start downloads over HTTP. It is for Windows too and comes in the same release.
-
-```sh
-set RAYOHX_API_API_KEYS=["my-secret-key"]
-rayohx-api
-```
-
-It listens on `http://127.0.0.1:8000` and needs an API key unless you turn authentication off for
-local development. The [API guide](docs/api.md) lists every setting and endpoint.
 
 ## Other ways to use RayoHX
 
@@ -103,9 +98,8 @@ local development. The [API guide](docs/api.md) lists every setting and endpoint
 ## Learn more
 
 - [Window guide](docs/guides/ui.md): adding streams, downloads and settings
-- [API guide](docs/api.md): endpoints, settings and authentication
 - [Security](docs/security.md): how the window and the API protect your data
-- [Documentation index](docs/README.md): architecture, development, testing, releasing and packaging
+- [Documentation index](docs/README.md): architecture, development, testing, releasing and packaging, and the internal API
 - [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) · [Security policy](SECURITY.md) · [Support](SUPPORT.md)
 - [Report a problem](https://github.com/coldsofttech/RayoHX-Desktop/issues)

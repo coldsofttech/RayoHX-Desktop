@@ -1,0 +1,26 @@
+name: Test the Windows setup
+description: Install the built setup.exe for the current user, run the installed app, then uninstall it and check nothing is left behind. Run on Windows, after scripts/build.py --setup.
+
+runs:
+  using: composite
+  steps:
+    - name: Install, run and uninstall the setup (per user)
+      shell: pwsh
+      run: |
+        $setup = Get-ChildItem "dist/rayohx-desktop-*-setup.exe" | Select-Object -First 1
+        $dir = Join-Path $env:RUNNER_TEMP "installed-rayohxd"
+        function Run-Setup($file, $arguments) {
+          $process = Start-Process -Wait -PassThru -FilePath $file -ArgumentList $arguments
+          if ($process.ExitCode -ne 0) { throw "$file exited with code $($process.ExitCode)" }
+        }
+        Run-Setup $setup.FullName @('/S', '/currentuser', "/D=$dir")
+        if (-not (Test-Path "$dir/rayohxd.exe")) { throw "the app was not installed" }
+        # The window is a GUI program: Start-Process -Wait waits for it, so it does not hold its
+        # files when the uninstaller runs.
+        Run-Setup "$dir/rayohxd.exe" @('--version')
+        if (-not (Test-Path "$dir/uninstall.exe")) { throw "no uninstaller" }
+        # _?= makes the uninstaller run in place, so Start-Process can wait for it.
+        Run-Setup "$dir/uninstall.exe" @('/S', "_?=$dir")
+        if (Test-Path "$dir/rayohxd.exe") { throw "uninstall left the app behind" }
+        if (Test-Path "$dir/lib") { throw "uninstall left lib behind" }
+        Remove-Item -Recurse -Force $dir -ErrorAction SilentlyContinue

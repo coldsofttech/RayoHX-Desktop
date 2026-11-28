@@ -7,8 +7,11 @@ body:
     attributes:
       label: Which part is this for?
       options:
-        - API
         - Desktop window (rayohx-desktop)
+        - API
+        - Windows setup (installer, uninstaller)
+        - Portable zip
+        - Documentation
         - Not Sure
     validations:
       required: true

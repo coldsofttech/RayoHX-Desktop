@@ -8,6 +8,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- A Windows setup (`.exe`) installs RayoHX Desktop, no Python needed, into `ColdSoft Technologies\RayoHX Desktop`.
 - Save default options for every download from Settings, and read a per-download log of what happened.
 - An Open folder button on Downloads shows the download folder in Explorer.
 - When a download fails because the file already exists, an Overwrite button replaces it and starts the download again.

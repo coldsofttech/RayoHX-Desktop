@@ -20,3 +20,12 @@ paths = [".schemathesis/"]
 requires = ["pyproject.toml"]
 profile = "python"
 description = "Schemathesis cache"
+
+# The frozen app's build folder (venv, PyInstaller work and output) from scripts/build.py. It is
+# rebuilt on the next build.
+[[rule]]
+id = "custom.freeze"
+paths = [".freeze/"]
+requires = ["scripts/build.py"]
+profile = "python"
+description = "Frozen app build folder"

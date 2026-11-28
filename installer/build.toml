@@ -20,3 +20,18 @@ compile = [
     "cornea", "webview", "clr_loader", "pythonnet", "proxy_tools", "uvicorn", "fastapi",
     "starlette", "pydantic", "pydantic_core", "pydantic_settings", "anyio", "h11",
 ]
+
+[setup]
+# Never change the guid after the first release: Windows uses it to find the installed app.
+guid = "{85E28768-F08C-4FA9-A665-E22769FD68DB}"
+title = "RayoHX Desktop"
+install-dir = "ColdSoft Technologies/RayoHX Desktop"
+start-menu-dir = "ColdSoft Technologies/RayoHX Desktop"
+nsi = "installer/windows/setup.nsi"
+licence = "LICENSE"
+icon = "brand/light/app.ico"
+header-image = "brand/dark/nsis/header.bmp"
+welcome-image = "brand/dark/nsis/welcome.bmp"
+homepage = "https://github.com/coldsofttech/RayoHX-Desktop"
+issues = "https://github.com/coldsofttech/RayoHX-Desktop/issues"
+changelog = "https://github.com/coldsofttech/RayoHX-Desktop/blob/main/CHANGELOG.md"
