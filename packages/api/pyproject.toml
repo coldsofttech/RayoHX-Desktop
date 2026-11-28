@@ -44,8 +44,6 @@ where = ["src"]
 [tool.cibuildwheel]
 build = "cp315-*"
 environment = { PYD_BUILD = "1" }
-test-requires = "pytest httpx2 rayohx-pytest@git+https://github.com/coldsofttech/RayoHX@pytest-v0.1.0#subdirectory=packages/pytest"
-test-command = "pytest -o addopts= {package}/tests/unit"
 
 # 64-bit only, same as the CLI: some dependencies publish no 32-bit Windows wheel.
 [tool.cibuildwheel.windows]

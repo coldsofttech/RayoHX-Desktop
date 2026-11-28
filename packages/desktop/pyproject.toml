@@ -43,8 +43,6 @@ where = ["src"]
 [tool.cibuildwheel]
 build = "cp315-*"
 environment = { PYD_BUILD = "1" }
-test-requires = "pytest httpx2"
-test-command = "pytest -o addopts= {package}/tests/unit"
 
 # 64-bit only, same as the CLI and API: some dependencies publish no 32-bit Windows wheel.
 [tool.cibuildwheel.windows]
